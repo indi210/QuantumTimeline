@@ -100,20 +100,100 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-info w-100" id="neuralScanBtn">
+                                <i class="fas fa-brain"></i>
+                                <span>Neural Scan</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-outline w-100" id="quantumBoostBtn">
+                                <i class="fas fa-bolt"></i>
+                                <span>Quantum Boost</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-danger w-100" id="securityScanBtn">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Security Scan</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <button class="quantum-btn quantum-btn-info w-100" id="dataAnalysisBtn">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Data Analysis</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button class="quantum-btn quantum-btn-warning w-100" id="matrixRecalBtn">
+                                <i class="fas fa-project-diagram"></i>
+                                <span>Matrix Recal</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
                             <button class="quantum-btn quantum-btn-info w-100" id="logsBtn">
                                 <i class="fas fa-list-alt"></i>
                                 <span>View Logs</span>
                                 <div class="btn-glow"></div>
                             </button>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <button class="quantum-btn quantum-btn-danger w-100" id="resetBtn">
                                 <i class="fas fa-redo-alt"></i>
                                 <span>Reset Interface</span>
                                 <div class="btn-glow"></div>
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Alerts -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel quantum-panel-danger">
+                    <h3><i class="fas fa-exclamation-triangle"></i> System Alerts</h3>
+                    <div class="alert-display" id="alertDisplay">
+                        {% for alert in watch.system_alerts %}
+                        <div class="alert-entry">{{ alert }}</div>
+                        {% else %}
+                        <div class="alert-entry-empty">No active alerts</div>
+                        {% endfor %}
+                    </div>
+                    <button class="quantum-btn quantum-btn-outline w-100 mt-2" id="clearAlertsBtn">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Clear All Alerts</span>
+                        <div class="btn-glow"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Streams -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel">
+                    <h3><i class="fas fa-stream"></i> Data Streams</h3>
+                    <div class="data-streams-display" id="dataStreamsDisplay">
+                        {% for stream in watch.data_streams %}
+                        <div class="stream-item">
+                            <div class="stream-id">{{ stream.id }}</div>
+                            <div class="stream-type">{{ stream.type }}</div>
+                            <div class="stream-status">{{ stream.status }}</div>
+                            <div class="stream-bandwidth">{{ stream.bandwidth }}%</div>
+                            <div class="stream-latency">{{ stream.latency }}ms</div>
+                        </div>
+                        {% else %}
+                        <div class="stream-item-empty">No active data streams</div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

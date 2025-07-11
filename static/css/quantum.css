@@ -466,6 +466,208 @@ body {
     }
 }
 
+/* Advanced Metrics Styling */
+.quantum-energy {
+    color: var(--quantum-info);
+}
+
+.neural-sync {
+    color: var(--quantum-accent);
+}
+
+.matrix-stability {
+    color: var(--quantum-success);
+}
+
+.threat-level {
+    color: var(--quantum-warning);
+}
+
+/* System Alerts */
+.alert-display {
+    background: var(--quantum-bg);
+    border: 1px solid var(--quantum-danger);
+    border-radius: 5px;
+    padding: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.alert-entry {
+    padding: 8px;
+    margin: 5px 0;
+    background: rgba(255, 0, 85, 0.1);
+    border-left: 3px solid var(--quantum-danger);
+    color: var(--quantum-danger);
+    animation: alertPulse 2s infinite;
+}
+
+.alert-entry-empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--quantum-muted);
+    font-style: italic;
+}
+
+@keyframes alertPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Data Streams */
+.data-streams-display {
+    background: var(--quantum-bg);
+    border: 1px solid var(--quantum-border);
+    border-radius: 5px;
+    padding: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.stream-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 10px;
+    padding: 10px;
+    margin: 5px 0;
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid var(--quantum-border);
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+}
+
+.stream-item-empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--quantum-muted);
+    font-style: italic;
+}
+
+.stream-id {
+    font-weight: bold;
+    color: var(--quantum-primary);
+}
+
+.stream-type {
+    color: var(--quantum-secondary);
+}
+
+.stream-status {
+    color: var(--quantum-info);
+}
+
+.stream-bandwidth {
+    color: var(--quantum-warning);
+}
+
+.stream-latency {
+    color: var(--quantum-accent);
+}
+
+/* Neural Scan Results */
+.neural-scan-results {
+    background: var(--quantum-bg);
+    border: 1px solid var(--quantum-accent);
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 15px;
+    font-family: 'Courier New', monospace;
+}
+
+.neural-pattern {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--quantum-border);
+    color: var(--quantum-accent);
+}
+
+.neural-pattern:last-child {
+    border-bottom: none;
+}
+
+/* Security Scan Results */
+.security-scan-results {
+    background: var(--quantum-bg);
+    border: 1px solid var(--quantum-danger);
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 15px;
+    font-family: 'Courier New', monospace;
+}
+
+.security-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--quantum-border);
+}
+
+.security-item:last-child {
+    border-bottom: none;
+}
+
+.security-threat-green {
+    color: var(--quantum-success);
+}
+
+.security-threat-yellow {
+    color: var(--quantum-warning);
+}
+
+.security-threat-red {
+    color: var(--quantum-danger);
+}
+
+/* Progress Bars */
+.quantum-progress {
+    width: 100%;
+    height: 8px;
+    background: var(--quantum-border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 5px 0;
+}
+
+.quantum-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--quantum-primary), var(--quantum-secondary));
+    transition: width 0.3s ease;
+    animation: progressGlow 2s infinite;
+}
+
+@keyframes progressGlow {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
+/* Enhanced Button Animations */
+.quantum-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 0 15px var(--quantum-glow);
+}
+
+.quantum-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive Data Streams */
+@media (max-width: 768px) {
+    .stream-item {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+    
+    .stream-item div {
+        text-align: center;
+        padding: 2px;
+    }
+}
+
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
     width: 8px;

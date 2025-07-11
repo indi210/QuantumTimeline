@@ -22,6 +22,14 @@ class QuantumInterface {
         document.getElementById('logsBtn').addEventListener('click', () => this.refreshLogs());
         document.getElementById('resetBtn').addEventListener('click', () => this.resetInterface());
         document.getElementById('rootAccessBtn').addEventListener('click', () => this.accessRootKey());
+        
+        // Advanced feature buttons
+        document.getElementById('neuralScanBtn').addEventListener('click', () => this.performNeuralScan());
+        document.getElementById('quantumBoostBtn').addEventListener('click', () => this.performQuantumBoost());
+        document.getElementById('securityScanBtn').addEventListener('click', () => this.performSecurityScan());
+        document.getElementById('dataAnalysisBtn').addEventListener('click', () => this.performDataAnalysis());
+        document.getElementById('matrixRecalBtn').addEventListener('click', () => this.performMatrixRecalibration());
+        document.getElementById('clearAlertsBtn').addEventListener('click', () => this.clearSystemAlerts());
     }
 
     showLoading() {
@@ -246,14 +254,201 @@ class QuantumInterface {
         }, 5000);
     }
 
+    async performNeuralScan() {
+        try {
+            const result = await this.makeRequest('/api/neural-scan');
+            if (result.success) {
+                this.showToast(result.message, 'info');
+                this.displayNeuralResults(result.scan_results);
+                this.updateMetrics();
+                this.refreshLogs();
+            }
+        } catch (error) {
+            console.error('Neural scan failed:', error);
+        }
+    }
+
+    async performQuantumBoost() {
+        try {
+            const result = await this.makeRequest('/api/quantum-boost');
+            if (result.success) {
+                this.showToast(result.message, 'success');
+                this.updateMetrics();
+                this.refreshLogs();
+            }
+        } catch (error) {
+            console.error('Quantum boost failed:', error);
+        }
+    }
+
+    async performSecurityScan() {
+        try {
+            const result = await this.makeRequest('/api/security-scan');
+            if (result.success) {
+                this.showToast(result.message, 'warning');
+                this.displaySecurityResults(result.scan_results);
+                this.updateMetrics();
+                this.refreshLogs();
+            }
+        } catch (error) {
+            console.error('Security scan failed:', error);
+        }
+    }
+
+    async performDataAnalysis() {
+        try {
+            const result = await this.makeRequest('/api/data-analysis');
+            if (result.success) {
+                this.showToast(result.message, 'info');
+                this.displayDataStreams(result.data_streams);
+                this.refreshLogs();
+            }
+        } catch (error) {
+            console.error('Data analysis failed:', error);
+        }
+    }
+
+    async performMatrixRecalibration() {
+        try {
+            const result = await this.makeRequest('/api/matrix-recalibration');
+            if (result.success) {
+                this.showToast(result.message, 'warning');
+                this.updateMetrics();
+                this.refreshLogs();
+            }
+        } catch (error) {
+            console.error('Matrix recalibration failed:', error);
+        }
+    }
+
+    async clearSystemAlerts() {
+        try {
+            const result = await this.makeRequest('/api/clear-alerts');
+            if (result.success) {
+                this.showToast(result.message, 'success');
+                this.updateAlerts([]);
+                this.refreshLogs();
+            }
+        } catch (error) {
+            console.error('Clear alerts failed:', error);
+        }
+    }
+
+    displayNeuralResults(results) {
+        const signaturePanel = document.getElementById('signaturePanel');
+        const signatureDisplay = document.getElementById('signatureDisplay');
+        
+        signatureDisplay.innerHTML = `
+            <div class="neural-scan-results">
+                <div class="signature-header">
+                    <strong>Neural Scan Results:</strong>
+                </div>
+                <div class="neural-pattern">
+                    <span>Patterns Detected:</span>
+                    <span>${results.patterns_detected.join(', ')}</span>
+                </div>
+                <div class="neural-pattern">
+                    <span>Sync Level:</span>
+                    <span>${results.sync_level}%</span>
+                </div>
+                <div class="neural-pattern">
+                    <span>Scan Status:</span>
+                    <span>${results.scan_complete ? 'COMPLETE' : 'PROCESSING'}</span>
+                </div>
+            </div>
+        `;
+        
+        signaturePanel.style.display = 'block';
+        signaturePanel.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    displaySecurityResults(results) {
+        const signaturePanel = document.getElementById('signaturePanel');
+        const signatureDisplay = document.getElementById('signatureDisplay');
+        
+        const threatClass = results.threat_level === 'Green' ? 'security-threat-green' : 
+                           results.threat_level === 'Yellow' ? 'security-threat-yellow' : 
+                           'security-threat-red';
+        
+        signatureDisplay.innerHTML = `
+            <div class="security-scan-results">
+                <div class="signature-header">
+                    <strong>Security Scan Results:</strong>
+                </div>
+                <div class="security-item">
+                    <span>Threat Level:</span>
+                    <span class="${threatClass}">${results.threat_level}</span>
+                </div>
+                <div class="security-item">
+                    <span>Threat Type:</span>
+                    <span>${results.threat_type}</span>
+                </div>
+                <div class="security-item">
+                    <span>Scan Time:</span>
+                    <span>${new Date().toLocaleTimeString()}</span>
+                </div>
+            </div>
+        `;
+        
+        signaturePanel.style.display = 'block';
+        signaturePanel.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    displayDataStreams(streams) {
+        const dataStreamsDisplay = document.getElementById('dataStreamsDisplay');
+        dataStreamsDisplay.innerHTML = '';
+        
+        if (streams.length === 0) {
+            dataStreamsDisplay.innerHTML = '<div class="stream-item-empty">No active data streams</div>';
+            return;
+        }
+        
+        streams.forEach(stream => {
+            const streamItem = document.createElement('div');
+            streamItem.className = 'stream-item';
+            streamItem.innerHTML = `
+                <div class="stream-id">${stream.id}</div>
+                <div class="stream-type">${stream.type}</div>
+                <div class="stream-status">${stream.status}</div>
+                <div class="stream-bandwidth">${stream.bandwidth}%</div>
+                <div class="stream-latency">${stream.latency}ms</div>
+            `;
+            dataStreamsDisplay.appendChild(streamItem);
+        });
+    }
+
+    updateAlerts(alerts) {
+        const alertDisplay = document.getElementById('alertDisplay');
+        alertDisplay.innerHTML = '';
+        
+        if (alerts.length === 0) {
+            alertDisplay.innerHTML = '<div class="alert-entry-empty">No active alerts</div>';
+            return;
+        }
+        
+        alerts.forEach(alert => {
+            const alertEntry = document.createElement('div');
+            alertEntry.className = 'alert-entry';
+            alertEntry.textContent = alert;
+            alertDisplay.appendChild(alertEntry);
+        });
+    }
+
     async updateMetrics() {
         try {
             const result = await this.makeRequest('/api/status', 'GET');
             
-            // Update metrics display
-            document.getElementById('activationCount').textContent = result.activation_count;
-            document.getElementById('buildCount').textContent = result.build_count;
-            document.getElementById('actionCount').textContent = result.total_actions;
+            // Update advanced metrics display
+            document.getElementById('quantumEnergy').textContent = result.quantum_energy + '%';
+            document.getElementById('neuralSync').textContent = result.neural_sync + '%';
+            document.getElementById('matrixStability').textContent = result.matrix_stability + '%';
+            document.getElementById('threatLevel').textContent = result.threat_level;
+            
+            // Update alerts
+            this.updateAlerts(result.system_alerts);
+            
+            // Update data streams
+            this.displayDataStreams(result.data_streams);
             
         } catch (error) {
             console.error('Status update failed:', error);
