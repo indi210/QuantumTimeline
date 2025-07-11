@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Interface Watch | Ervin Remus Radosavlevici</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Quantum CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/quantum.css') }}">
+</head>
+<body>
+    <!-- Quantum Background Animation -->
+    <div class="quantum-bg">
+        <div class="quantum-particles"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container-fluid quantum-container">
+        <!-- Header -->
+        <header class="text-center mb-4">
+            <h1 class="quantum-title">
+                <i class="fas fa-atom quantum-icon"></i>
+                Quantum Interface Watch
+            </h1>
+            <p class="quantum-subtitle">
+                Authored by <span class="text-cyan">Ervin Remus Radosavlevici</span>
+            </p>
+        </header>
+
+        <!-- Status Panel -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="status-display">
+                                <h3><i class="fas fa-signal"></i> System Status</h3>
+                                <div class="status-indicator" id="statusIndicator">
+                                    <span class="status-text" id="statusText">{{ watch.status }}</span>
+                                    <div class="pulse-dot" id="pulseDot"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="metrics-display">
+                                <h3><i class="fas fa-chart-line"></i> Metrics</h3>
+                                <div class="metrics-grid">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Activations:</span>
+                                        <span class="metric-value" id="activationCount">{{ watch.activation_count }}</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Builds:</span>
+                                        <span class="metric-value" id="buildCount">{{ watch.build_count }}</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Actions:</span>
+                                        <span class="metric-value" id="actionCount">{{ watch.actions_log|length }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel">
+                    <h3><i class="fas fa-gamepad"></i> Control Interface</h3>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-primary w-100" id="activateBtn">
+                                <i class="fas fa-power-off"></i>
+                                <span>Activate Interface</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-success w-100" id="buildBtn">
+                                <i class="fas fa-cogs"></i>
+                                <span>Complete Build</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-warning w-100" id="signatureBtn">
+                                <i class="fas fa-signature"></i>
+                                <span>Generate Signature</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <button class="quantum-btn quantum-btn-info w-100" id="logsBtn">
+                                <i class="fas fa-list-alt"></i>
+                                <span>View Logs</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <button class="quantum-btn quantum-btn-danger w-100" id="resetBtn">
+                                <i class="fas fa-redo-alt"></i>
+                                <span>Reset Interface</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Logs -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel">
+                    <h3><i class="fas fa-terminal"></i> Activity Logs</h3>
+                    <div class="log-display" id="logDisplay">
+                        {% for log in watch.actions_log %}
+                        <div class="log-entry">{{ log }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Digital Signature Display -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel" id="signaturePanel" style="display: none;">
+                    <h3><i class="fas fa-shield-alt"></i> Digital Signature</h3>
+                    <div class="signature-display" id="signatureDisplay">
+                        <!-- Signature will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Root Access Panel -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel quantum-panel-danger">
+                    <h3><i class="fas fa-key"></i> Root Access</h3>
+                    <p class="text-muted">Administrative access for quantum interface management</p>
+                    <button class="quantum-btn quantum-btn-outline w-100" id="rootAccessBtn">
+                        <i class="fas fa-unlock-alt"></i>
+                        <span>Access Root Key</span>
+                        <div class="btn-glow"></div>
+                    </button>
+                    <div class="root-key-display" id="rootKeyDisplay" style="display: none;">
+                        <!-- Root key will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="quantum-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-text">Processing...</div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast quantum-toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                <strong class="me-auto">Quantum Interface</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                Operation completed successfully!
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom Quantum JS -->
+    <script src="{{ url_for('static', filename='js/quantum.js') }}"></script>
+</body>
+</html>
