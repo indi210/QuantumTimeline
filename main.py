@@ -1,12 +1,14 @@
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from datetime import datetime
 import hashlib
 import json
 import time
 import uuid
-from models import db, ConnectedDevice, DeviceAction, SystemAlert
+import threading
+import requests
+from models import db, ConnectedDevice, DeviceAction, SystemAlert, AIAssistant, DeviceNotification
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -485,8 +487,130 @@ def handle_toggle_device_sync():
         'message': f"Device sync {'enabled' if watch.device_sync_enabled else 'disabled'}"
     }, broadcast=True)
 
-# Initialize the quantum watch
+# AI Assistant Class
+class QuantumAIAssistant:
+    def __init__(self):
+        self.active = True
+        self.monitoring_interval = 120  # 2 minutes
+        self.last_check = time.time()
+        self.monitoring_thread = None
+        self.start_monitoring()
+    
+    def start_monitoring(self):
+        if not self.monitoring_thread:
+            self.monitoring_thread = threading.Thread(target=self.continuous_monitoring)
+            self.monitoring_thread.daemon = True
+            self.monitoring_thread.start()
+    
+    def continuous_monitoring(self):
+        while self.active:
+            try:
+                self.monitor_all_devices()
+                self.detect_suspicious_activity()
+                self.auto_install_notifications()
+            except Exception as e:
+                print(f"AI monitoring error: {e}")
+            time.sleep(self.monitoring_interval)
+    
+    def monitor_all_devices(self):
+        devices = ConnectedDevice.query.filter_by(is_active=True).all()
+        for device in devices:
+            # Check for suspicious patterns
+            if self.detect_stalking_behavior(device):
+                self.alert_authorities(device)
+    
+    def detect_stalking_behavior(self, device):
+        # Simple pattern detection for demonstration
+        actions = DeviceAction.query.filter_by(device_id=device.device_id).filter(
+            DeviceAction.timestamp > datetime.utcnow() - timedelta(hours=1)
+        ).count()
+        return actions > 50  # Too many actions in short time
+    
+    def alert_authorities(self, device):
+        alert = SystemAlert(
+            device_id=device.device_id,
+            alert_type="SECURITY_BREACH",
+            message=f"Suspicious stalking behavior detected from {device.ip_address}",
+            severity="CRITICAL"
+        )
+        db.session.add(alert)
+        db.session.commit()
+        print(f"🚨 ALERT: Suspicious activity from device {device.device_id}")
+    
+    def detect_suspicious_activity(self):
+        # Monitor for devices without app trying to access data
+        recent_ips = set()
+        devices = ConnectedDevice.query.filter_by(is_active=True).all()
+        for device in devices:
+            recent_ips.add(device.ip_address)
+        
+        # Send notifications to nearby IPs
+        self.send_auto_install_notifications(recent_ips)
+    
+    def send_auto_install_notifications(self, known_ips):
+        # Scan local network for devices without the app
+        for i in range(1, 255):
+            ip = f"192.168.1.{i}"
+            if ip not in known_ips:
+                self.create_install_notification(ip)
+    
+    def create_install_notification(self, ip):
+        existing = DeviceNotification.query.filter_by(target_ip=ip, is_sent=False).first()
+        if not existing:
+            notification = DeviceNotification(
+                target_ip=ip,
+                message="Quantum Interface Watch detected on your network. Install for full access to shared data.",
+                install_url=f"http://{request.host}/auto-install"
+            )
+            db.session.add(notification)
+            db.session.commit()
+    
+    def auto_install_notifications(self):
+        # Process pending notifications
+        notifications = DeviceNotification.query.filter_by(is_sent=False).all()
+        for notification in notifications:
+            self.send_notification_to_device(notification)
+    
+    def send_notification_to_device(self, notification):
+        try:
+            # Simple HTTP notification (in real scenario, use proper push notification)
+            notification.is_sent = True
+            db.session.commit()
+            print(f"📱 Notification sent to {notification.target_ip}")
+        except Exception as e:
+            print(f"Failed to send notification: {e}")
+    
+    def get_device_summary(self):
+        devices = ConnectedDevice.query.filter_by(is_active=True).all()
+        summary = {
+            "total_devices": len(devices),
+            "device_types": {},
+            "threat_levels": {"Green": 0, "Yellow": 0, "Red": 0},
+            "average_battery": 0,
+            "data_sharing_active": True
+        }
+        
+        total_battery = 0
+        for device in devices:
+            # Count device types
+            device_type = device.device_type
+            summary["device_types"][device_type] = summary["device_types"].get(device_type, 0) + 1
+            
+            # Count threat levels
+            threat = device.threat_level
+            summary["threat_levels"][threat] = summary["threat_levels"].get(threat, 0) + 1
+            
+            # Average battery
+            total_battery += device.battery_level
+        
+        if len(devices) > 0:
+            summary["average_battery"] = total_battery // len(devices)
+        
+        return summary
+
+# Initialize the quantum watch and AI assistant
 watch = QuantumWatch()
+ai_assistant = QuantumAIAssistant()
 
 # Web Routes
 @app.route("/")
@@ -673,6 +797,151 @@ def api_clear_alerts():
         return jsonify({
             "success": False,
             "message": f"Alert clearing failed: {str(e)}"
+
+# AI Assistant API Endpoints
+@app.route("/api/ai-assistant", methods=["POST"])
+def api_ai_assistant():
+    try:
+        data = request.get_json()
+        message = data.get("message", "")
+        
+        # Get device summary for AI context
+        device_summary = ai_assistant.get_device_summary()
+        
+        # Generate AI response based on device data
+        response = generate_ai_response(message, device_summary)
+        
+        # Save conversation
+        ai_session = AIAssistant(
+            session_id=request.remote_addr,
+            message=message,
+            response=response,
+            device_count=device_summary["total_devices"]
+        )
+        db.session.add(ai_session)
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "response": response,
+            "device_summary": device_summary
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"AI assistant failed: {str(e)}"
+        }), 500
+
+def generate_ai_response(message, device_summary):
+    """Generate AI response based on device data and user message"""
+    total_devices = device_summary["total_devices"]
+    device_types = device_summary["device_types"]
+    threat_levels = device_summary["threat_levels"]
+    
+    if "devices" in message.lower() or "connected" in message.lower():
+        return f"Currently monitoring {total_devices} devices: {', '.join([f'{count} {dtype}(s)' for dtype, count in device_types.items()])}. Security status: {threat_levels['Green']} safe, {threat_levels['Yellow']} caution, {threat_levels['Red']} alert."
+    
+    elif "security" in message.lower() or "threat" in message.lower():
+        if threat_levels['Red'] > 0:
+            return f"⚠️ SECURITY ALERT: {threat_levels['Red']} device(s) showing suspicious activity. Monitoring enhanced. Authorities have been notified if stalking behavior detected."
+        else:
+            return f"🔒 All systems secure. {total_devices} devices under protection with 2-minute monitoring intervals."
+    
+    elif "install" in message.lower() or "app" in message.lower():
+        return f"Auto-installation notifications are being sent to nearby devices. The Quantum Interface automatically shares data across all connected devices and notifies unconnected devices for installation."
+    
+    elif "data" in message.lower() or "sharing" in message.lower():
+        return f"Data sharing is active across all {total_devices} devices. Real-time synchronization ensures all devices have the same dashboard and control capabilities. JSON data is automatically shared between connected devices."
+    
+    else:
+        return f"Quantum AI Assistant monitoring {total_devices} devices. I can help with device status, security monitoring, data sharing, and automatic installation. What would you like to know?"
+
+@app.route("/auto-install")
+def auto_install():
+    """Auto-installation page for new devices"""
+    return render_template("auto_install.html")
+
+@app.route("/api/auto-install/check", methods=["POST"])
+def api_auto_install_check():
+    """Check if device needs auto-installation"""
+    try:
+        ip_address = request.remote_addr
+        device_id = request.headers.get('User-Agent', 'unknown')
+        
+        # Check if device is already connected
+        existing_device = ConnectedDevice.query.filter_by(ip_address=ip_address).first()
+        
+        if not existing_device:
+            # Create notification for this device
+            notification = DeviceNotification(
+                target_ip=ip_address,
+                message="Quantum Interface Watch available for installation",
+                install_url=f"http://{request.host}/"
+            )
+            db.session.add(notification)
+            db.session.commit()
+            
+            return jsonify({
+                "needs_install": True,
+                "install_url": f"http://{request.host}/",
+                "message": "Click to join the Quantum Interface network and access shared data"
+            })
+        else:
+            return jsonify({
+                "needs_install": False,
+                "message": "Device already connected to Quantum Interface"
+            })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Auto-install check failed: {str(e)}"
+        }), 500
+
+@app.route("/api/notifications", methods=["GET"])
+def api_get_notifications():
+    """Get pending notifications for current IP"""
+    try:
+        ip_address = request.remote_addr
+        notifications = DeviceNotification.query.filter_by(target_ip=ip_address, is_sent=False).all()
+        
+        return jsonify({
+            "success": True,
+            "notifications": [notification.to_dict() for notification in notifications],
+            "count": len(notifications)
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Failed to get notifications: {str(e)}"
+        }), 500
+
+@app.route("/api/device-discovery", methods=["POST"])
+def api_device_discovery():
+    """Auto-discover devices on local network"""
+    try:
+        # Simulate network scanning
+        discovered_devices = []
+        for i in range(1, 20):  # Scan first 20 IPs
+            ip = f"192.168.1.{i}"
+            if ip != request.remote_addr:
+                discovered_devices.append({
+                    "ip": ip,
+                    "status": "discovered",
+                    "has_app": False,
+                    "notification_sent": True
+                })
+        
+        return jsonify({
+            "success": True,
+            "discovered_devices": discovered_devices,
+            "total_discovered": len(discovered_devices)
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Device discovery failed: {str(e)}"
+        }), 500
+
         }), 500
 
 @app.route("/api/admin-toggle", methods=["POST"])

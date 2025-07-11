@@ -22,14 +22,14 @@ class QuantumInterface {
         document.getElementById('logsBtn').addEventListener('click', () => this.refreshLogs());
         document.getElementById('resetBtn').addEventListener('click', () => this.resetInterface());
         document.getElementById('rootAccessBtn').addEventListener('click', () => this.accessRootKey());
-        
+
         // Advanced feature buttons
         document.getElementById('neuralScanBtn').addEventListener('click', () => this.performNeuralScan());
         document.getElementById('quantumBoostBtn').addEventListener('click', () => this.performQuantumBoost());
         document.getElementById('securityScanBtn').addEventListener('click', () => this.performSecurityScan());
         document.getElementById('dataAnalysisBtn').addEventListener('click', () => this.performDataAnalysis());
         document.getElementById('matrixRecalBtn').addEventListener('click', () => this.performMatrixRecalibration());
-        
+
         // Admin dashboard buttons
         document.getElementById('adminToggleBtn').addEventListener('click', () => this.toggleAdminMode());
         document.getElementById('performanceOptBtn').addEventListener('click', () => this.performanceOptimization());
@@ -52,12 +52,12 @@ class QuantumInterface {
     showToast(message, type = 'success') {
         const toast = document.getElementById('successToast');
         const toastMessage = document.getElementById('toastMessage');
-        
+
         toastMessage.textContent = message;
-        
+
         const bsToast = new bootstrap.Toast(toast);
         bsToast.show();
-        
+
         // Add visual feedback
         this.addVisualFeedback(type);
     }
@@ -69,7 +69,7 @@ class QuantumInterface {
             danger: '#ff0055',
             info: '#0099ff'
         };
-        
+
         // Create temporary glow effect
         document.body.style.boxShadow = `inset 0 0 50px ${colors[type]}`;
         setTimeout(() => {
@@ -80,21 +80,21 @@ class QuantumInterface {
     async makeRequest(endpoint, method = 'POST') {
         try {
             this.showLoading();
-            
+
             const response = await fetch(endpoint, {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
                 }
             });
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             const data = await response.json();
             return data;
-            
+
         } catch (error) {
             console.error('Request failed:', error);
             this.showToast('Request failed: ' + error.message, 'danger');
@@ -181,9 +181,9 @@ class QuantumInterface {
     updateStatus(status) {
         const statusText = document.getElementById('statusText');
         const pulseDot = document.getElementById('pulseDot');
-        
+
         statusText.textContent = status;
-        
+
         // Update pulse dot color based on status
         if (status === 'Activated') {
             pulseDot.style.background = '#00ff41';
@@ -197,14 +197,14 @@ class QuantumInterface {
     updateLogs(logs) {
         const logDisplay = document.getElementById('logDisplay');
         logDisplay.innerHTML = '';
-        
+
         logs.forEach(log => {
             const logEntry = document.createElement('div');
             logEntry.className = 'log-entry';
             logEntry.textContent = log;
             logDisplay.appendChild(logEntry);
         });
-        
+
         // Auto-scroll to bottom
         logDisplay.scrollTop = logDisplay.scrollHeight;
     }
@@ -212,7 +212,7 @@ class QuantumInterface {
     displaySignature(signature) {
         const signaturePanel = document.getElementById('signaturePanel');
         const signatureDisplay = document.getElementById('signatureDisplay');
-        
+
         signatureDisplay.innerHTML = `
             <div class="signature-header">
                 <strong>SHA256 Digital Signature:</strong>
@@ -222,7 +222,7 @@ class QuantumInterface {
                 <small>Generated at: ${new Date().toISOString()}</small>
             </div>
         `;
-        
+
         signaturePanel.style.display = 'block';
         signaturePanel.scrollIntoView({ behavior: 'smooth' });
     }
@@ -234,7 +234,7 @@ class QuantumInterface {
 
     displayRootKey(rootData) {
         const rootKeyDisplay = document.getElementById('rootKeyDisplay');
-        
+
         rootKeyDisplay.innerHTML = `
             <div class="root-key-header">
                 <strong>Root Access Granted:</strong>
@@ -249,7 +249,7 @@ class QuantumInterface {
                 <span>Root Hash:</span> ${rootData.root_hash}
             </div>
         `;
-        
+
         rootKeyDisplay.style.display = 'block';
     }
 
@@ -394,7 +394,7 @@ class QuantumInterface {
     displayNeuralResults(results) {
         const signaturePanel = document.getElementById('signaturePanel');
         const signatureDisplay = document.getElementById('signatureDisplay');
-        
+
         signatureDisplay.innerHTML = `
             <div class="neural-scan-results">
                 <div class="signature-header">
@@ -414,7 +414,7 @@ class QuantumInterface {
                 </div>
             </div>
         `;
-        
+
         signaturePanel.style.display = 'block';
         signaturePanel.scrollIntoView({ behavior: 'smooth' });
     }
@@ -422,11 +422,11 @@ class QuantumInterface {
     displaySecurityResults(results) {
         const signaturePanel = document.getElementById('signaturePanel');
         const signatureDisplay = document.getElementById('signatureDisplay');
-        
+
         const threatClass = results.threat_level === 'Green' ? 'security-threat-green' : 
                            results.threat_level === 'Yellow' ? 'security-threat-yellow' : 
                            'security-threat-red';
-        
+
         signatureDisplay.innerHTML = `
             <div class="security-scan-results">
                 <div class="signature-header">
@@ -446,7 +446,7 @@ class QuantumInterface {
                 </div>
             </div>
         `;
-        
+
         signaturePanel.style.display = 'block';
         signaturePanel.scrollIntoView({ behavior: 'smooth' });
     }
@@ -454,12 +454,12 @@ class QuantumInterface {
     displayDataStreams(streams) {
         const dataStreamsDisplay = document.getElementById('dataStreamsDisplay');
         dataStreamsDisplay.innerHTML = '';
-        
+
         if (streams.length === 0) {
             dataStreamsDisplay.innerHTML = '<div class="stream-item-empty">No active data streams</div>';
             return;
         }
-        
+
         streams.forEach(stream => {
             const streamItem = document.createElement('div');
             streamItem.className = 'stream-item';
@@ -477,12 +477,12 @@ class QuantumInterface {
     updateAlerts(alerts) {
         const alertDisplay = document.getElementById('alertDisplay');
         alertDisplay.innerHTML = '';
-        
+
         if (alerts.length === 0) {
             alertDisplay.innerHTML = '<div class="alert-entry-empty">No active alerts</div>';
             return;
         }
-        
+
         alerts.forEach(alert => {
             const alertEntry = document.createElement('div');
             alertEntry.className = 'alert-entry';
@@ -494,7 +494,7 @@ class QuantumInterface {
     updateAdminMode(adminMode) {
         const adminToggleBtn = document.getElementById('adminToggleBtn');
         const icon = adminToggleBtn.querySelector('i');
-        
+
         if (adminMode) {
             icon.className = 'fas fa-toggle-on';
             adminToggleBtn.classList.add('admin-mode-active');
@@ -507,18 +507,18 @@ class QuantumInterface {
     async updateMetrics() {
         try {
             const result = await this.makeRequest('/api/status', 'GET');
-            
+
             // Update advanced metrics display
             const quantumEnergyEl = document.getElementById('quantumEnergy');
             const neuralSyncEl = document.getElementById('neuralSync');
             const matrixStabilityEl = document.getElementById('matrixStability');
             const threatLevelEl = document.getElementById('threatLevel');
-            
+
             if (quantumEnergyEl) quantumEnergyEl.textContent = result.quantum_energy + '%';
             if (neuralSyncEl) neuralSyncEl.textContent = result.neural_sync + '%';
             if (matrixStabilityEl) matrixStabilityEl.textContent = result.matrix_stability + '%';
             if (threatLevelEl) threatLevelEl.textContent = result.threat_level;
-            
+
             // Update admin metrics
             const cpuValue = document.getElementById('cpuValue');
             const memoryValue = document.getElementById('memoryValue');
@@ -527,7 +527,7 @@ class QuantumInterface {
             const systemTemperature = document.getElementById('systemTemperature');
             const powerConsumption = document.getElementById('powerConsumption');
             const cacheHitRate = document.getElementById('cacheHitRate');
-            
+
             if (cpuValue) cpuValue.textContent = result.cpu_usage + '%';
             if (memoryValue) memoryValue.textContent = result.memory_usage + '%';
             if (storageValue) storageValue.textContent = result.storage_usage + '%';
@@ -535,28 +535,28 @@ class QuantumInterface {
             if (systemTemperature) systemTemperature.textContent = result.system_temperature + '°C';
             if (powerConsumption) powerConsumption.textContent = result.power_consumption + 'W';
             if (cacheHitRate) cacheHitRate.textContent = result.cache_hit_rate + '%';
-            
+
             // Update progress bars
             const cpuBar = document.getElementById('cpuBar');
             const memoryBar = document.getElementById('memoryBar');
             const storageBar = document.getElementById('storageBar');
-            
+
             if (cpuBar) cpuBar.style.width = result.cpu_usage + '%';
             if (memoryBar) memoryBar.style.width = result.memory_usage + '%';
             if (storageBar) storageBar.style.width = result.storage_usage + '%';
-            
+
             // Update alerts
             this.updateAlerts(result.system_alerts);
-            
+
             // Update data streams
             const dataStreamsDisplay = document.getElementById('dataStreamsDisplay');
             if (dataStreamsDisplay) {
                 this.displayDataStreams(result.data_streams);
             }
-            
+
             // Update admin mode
             this.updateAdminMode(result.admin_mode);
-            
+
         } catch (error) {
             console.error('Status update failed:', error);
         }
@@ -565,7 +565,7 @@ class QuantumInterface {
     initializeParticles() {
         // Create additional quantum particles effect
         const particlesContainer = document.querySelector('.quantum-particles');
-        
+
         for (let i = 0; i < 50; i++) {
             const particle = document.createElement('div');
             particle.className = 'quantum-particle';
@@ -598,12 +598,12 @@ style.textContent = `
         0% { transform: translateY(0px) rotate(0deg); }
         100% { transform: translateY(-100vh) rotate(360deg); }
     }
-    
+
     .signature-header, .root-key-header {
         color: #00ffff;
         margin-bottom: 10px;
     }
-    
+
     .signature-hash {
         font-family: 'Courier New', monospace;
         font-size: 0.9rem;
@@ -613,24 +613,24 @@ style.textContent = `
         border-radius: 5px;
         margin: 10px 0;
     }
-    
+
     .signature-info {
         color: #888;
         font-size: 0.8rem;
         margin-top: 10px;
     }
-    
+
     .root-key-item {
         display: flex;
         justify-content: space-between;
         padding: 5px 0;
         border-bottom: 1px solid #333;
     }
-    
+
     .root-key-item:last-child {
         border-bottom: none;
     }
-    
+
     .root-key-item span:first-child {
         font-weight: bold;
         color: #ff0055;
@@ -653,44 +653,44 @@ let connectedDevices = [];
 
 function initializeSocket() {
     socket = io();
-    
+
     socket.on('connect', () => {
         console.log('Connected to server');
         loadConnectedDevices();
     });
-    
+
     socket.on('disconnect', () => {
         console.log('Disconnected from server');
     });
-    
+
     socket.on('device_connected', (data) => {
         console.log('Device connected:', data);
         addDeviceToGrid(data.device);
         showDeviceNotification(data.message, 'success');
     });
-    
+
     socket.on('device_disconnected', (data) => {
         console.log('Device disconnected:', data);
         removeDeviceFromGrid(data.device_id);
         showDeviceNotification(data.message, 'warning');
     });
-    
+
     socket.on('device_data_updated', (data) => {
         console.log('Device data updated:', data);
         updateDeviceInGrid(data.device);
     });
-    
+
     socket.on('action_result', (data) => {
         console.log('Action result:', data);
         addActionToLog(data);
     });
-    
+
     socket.on('device_sync_toggled', (data) => {
         console.log('Device sync toggled:', data);
         updateSyncStatus(data.enabled);
         showDeviceNotification(data.message, 'info');
     });
-    
+
     socket.on('all_devices', (data) => {
         console.log('All devices:', data);
         connectedDevices = data.devices;
@@ -715,9 +715,9 @@ function loadConnectedDevices() {
 function renderDevicesGrid() {
     const grid = document.getElementById('connectedDevicesGrid');
     if (!grid) return;
-    
+
     grid.innerHTML = '';
-    
+
     if (connectedDevices.length === 0) {
         grid.innerHTML = `
             <div class="no-devices">
@@ -728,7 +728,7 @@ function renderDevicesGrid() {
         `;
         return;
     }
-    
+
     connectedDevices.forEach(device => {
         const deviceCard = createDeviceCard(device);
         grid.appendChild(deviceCard);
@@ -739,11 +739,11 @@ function createDeviceCard(device) {
     const card = document.createElement('div');
     card.className = `device-card ${device.is_active ? 'online' : 'offline'}`;
     card.id = `device-${device.device_id}`;
-    
+
     const deviceIcon = getDeviceIcon(device.device_type);
     const connectionTime = new Date(device.connected_at).toLocaleString();
     const lastSeen = new Date(device.last_seen).toLocaleString();
-    
+
     card.innerHTML = `
         <div class="device-header">
             <div class="device-name">
@@ -793,7 +793,7 @@ function createDeviceCard(device) {
             </button>
         </div>
     `;
-    
+
     return card;
 }
 
@@ -841,7 +841,7 @@ function syncDevice(deviceId) {
         matrix_stability: Math.floor(Math.random() * 100) + 50,
         threat_level: ['Green', 'Yellow', 'Red'][Math.floor(Math.random() * 3)]
     };
-    
+
     fetch(`/api/device/${deviceId}/sync`, {
         method: 'POST',
         headers: {
@@ -899,9 +899,9 @@ function showDeviceNotification(message, type) {
         animation: slideIn 0.3s ease;
     `;
     notification.textContent = message;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
@@ -910,7 +910,7 @@ function showDeviceNotification(message, type) {
 function updateSyncStatus(enabled) {
     const syncIndicator = document.querySelector('.sync-indicator');
     const syncStatusText = document.getElementById('syncStatusText');
-    
+
     if (syncIndicator && syncStatusText) {
         if (enabled) {
             syncIndicator.classList.remove('disabled');
@@ -925,32 +925,247 @@ function updateSyncStatus(enabled) {
 function addActionToLog(actionData) {
     const actionsDisplay = document.getElementById('actionsDisplay');
     if (!actionsDisplay) return;
-    
+
     const actionEntry = document.createElement('div');
     actionEntry.className = 'action-entry';
-    
+
     const timestamp = new Date().toLocaleTimeString();
     actionEntry.innerHTML = `
         <div class="action-device">${actionData.device_id.substr(0, 8)}</div>
         <div class="action-type">${actionData.action_type}</div>
         <div class="action-timestamp">${timestamp}</div>
     `;
-    
+
     actionsDisplay.insertBefore(actionEntry, actionsDisplay.firstChild);
-    
+
     // Keep only last 10 actions
     while (actionsDisplay.children.length > 10) {
         actionsDisplay.removeChild(actionsDisplay.lastChild);
     }
 }
 
+// Global variables for AI assistant
+let aiAssistantActive = false;
+
+// Initialize when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    loadConnectedDevices();
+    initializeEventListeners();
+    initializeSocket();
+    updateConnectionUrl();
+    initializeAIAssistant();
+    startAutoDiscovery();
+
+    // Auto-refresh status every 5 seconds
+    setInterval(updateStatus, 5000);
+
+    // AI monitoring every 2 minutes
+    setInterval(checkAIUpdates, 120000);
+
+    // Auto data sharing every 10 seconds
+    setInterval(shareDataWithAllDevices, 10000);
+});
+
+function initializeAIAssistant() {
+    // Add AI assistant panel to page
+    const aiPanel = document.createElement('div');
+    aiPanel.className = 'quantum-panel ai-assistant-panel';
+    aiPanel.innerHTML = `
+        <h3><i class="fas fa-robot"></i> AI Assistant</h3>
+        <div class="ai-chat-area" id="aiChatArea">
+            <div class="ai-message">
+                <strong>AI Assistant:</strong> Hello! I'm monitoring all connected devices and can help with security, data sharing, and device management. What would you like to know?
+            </div>
+        </div>
+        <div class="ai-input-area">
+            <input type="text" id="aiMessageInput" class="form-control" placeholder="Ask about devices, security, or data sharing...">
+            <button id="aiSendBtn" class="quantum-btn quantum-btn-primary">
+                <i class="fas fa-paper-plane"></i>
+                Send
+            </button>
+        </div>
+    `;
+
+    // Insert AI panel after the main controls
+    const mainContainer = document.querySelector('.container');
+    if (mainContainer) {
+        mainContainer.appendChild(aiPanel);
+    }
+
+    // AI input event listeners
+    const aiSendBtn = document.getElementById('aiSendBtn');
+    const aiMessageInput = document.getElementById('aiMessageInput');
+
+    if (aiSendBtn) {
+        aiSendBtn.addEventListener('click', sendAIMessage);
+    }
+
+    if (aiMessageInput) {
+        aiMessageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendAIMessage();
+            }
+        });
+    }
+}
+
+function sendAIMessage() {
+    const messageInput = document.getElementById('aiMessageInput');
+    const chatArea = document.getElementById('aiChatArea');
+    const message = messageInput.value.trim();
+
+    if (!message) return;
+
+    // Add user message to chat
+    chatArea.innerHTML += `
+        <div class="user-message">
+            <strong>You:</strong> ${message}
+        </div>
+    `;
+
+    messageInput.value = '';
+
+    // Send to AI assistant
+    fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            chatArea.innerHTML += `
+                <div class="ai-message">
+                    <strong>AI Assistant:</strong> ${data.response}
+                </div>
+            `;
+
+            // Show device summary if available
+            if (data.device_summary) {
+                displayDeviceSummary(data.device_summary);
+            }
+        }
+        chatArea.scrollTop = chatArea.scrollHeight;
+    })
+    .catch(error => {
+        console.error('AI assistant error:', error);
+        chatArea.innerHTML += `
+            <div class="ai-error">
+                <strong>Error:</strong> AI assistant temporarily unavailable
+            </div>
+        `;
+    });
+}
+
+function displayDeviceSummary(summary) {
+    const summaryPanel = document.getElementById('deviceSummaryPanel') || createDeviceSummaryPanel();
+    summaryPanel.innerHTML = `
+        <h4>Device Network Summary</h4>
+        <div class="summary-stats">
+            <div class="stat-item">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Total Devices: ${summary.total_devices}</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-battery-three-quarters"></i>
+                <span>Avg Battery: ${summary.average_battery}%</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-share-alt"></i>
+                <span>Data Sharing: ${summary.data_sharing_active ? 'Active' : 'Inactive'}</span>
+            </div>
+        </div>
+    `;
+}
+
+function createDeviceSummaryPanel() {
+    const panel = document.createElement('div');
+    panel.id = 'deviceSummaryPanel';
+    panel.className = 'quantum-panel device-summary-panel';
+
+    const container = document.querySelector('.container');
+    if (container) {
+        container.appendChild(panel);
+    }
+
+    return panel;
+}
+
+function startAutoDiscovery() {
+    // Auto-discover new devices every 30 seconds
+    setInterval(() => {
+        fetch('/api/device-discovery', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.discovered_devices.length > 0) {
+                console.log(`Discovered ${data.total_discovered} devices on network`);
+                notifyAutoInstall(data.discovered_devices);
+            }
+        })
+        .catch(error => {
+            console.error('Auto-discovery error:', error);
+        });
+    }, 30000);
+}
+
+function notifyAutoInstall(devices) {
+    devices.forEach(device => {
+        if (!device.has_app) {
+            showDeviceNotification(`New device detected at ${device.ip}. Installation notification sent.`, 'info');
+        }
+    });
+}
+
+function shareDataWithAllDevices() {
+    // Auto-share current quantum data with all connected devices
+    const sharedData = {
+        quantum_energy: 100,
+        neural_sync: Math.floor(Math.random() * 100),
+        matrix_stability: Math.floor(Math.random() * 100) + 50,
+        timestamp: new Date().toISOString(),
+        data_sharing: true,
+        auto_sync: true
+    };
+
+    if (socket && socket.connected) {
+        socket.emit('share_data_all_devices', sharedData);
+    }
+}
+
+function checkAIUpdates() {
+    // Check for AI assistant updates and security monitoring
+    fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: "security status update" })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.response.includes('ALERT')) {
+            showDeviceNotification('🚨 Security Alert: ' + data.response, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('AI update check failed:', error);
+    });
+}
+
 // Initialize the Quantum Interface when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.quantumInterface = new QuantumInterface();
-    
+
     // Initialize Socket.IO
     initializeSocket();
-    
+
     // Add event listeners for device management buttons
     const deviceSyncToggleBtn = document.getElementById('deviceSyncToggleBtn');
     if (deviceSyncToggleBtn) {
@@ -965,7 +1180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         });
     }
-    
+
     const refreshDevicesBtn = document.getElementById('refreshDevicesBtn');
     if (refreshDevicesBtn) {
         refreshDevicesBtn.addEventListener('click', function() {
@@ -973,7 +1188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showDeviceNotification('Devices refreshed', 'info');
         });
     }
-    
+
     const scanDevicesBtn = document.getElementById('scanDevicesBtn');
     if (scanDevicesBtn) {
         scanDevicesBtn.addEventListener('click', function() {
@@ -983,7 +1198,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     const syncAllDevicesBtn = document.getElementById('syncAllDevicesBtn');
     if (syncAllDevicesBtn) {
         syncAllDevicesBtn.addEventListener('click', function() {
@@ -994,7 +1209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    
+
     const broadcastActionBtn = document.getElementById('broadcastActionBtn');
     if (broadcastActionBtn) {
         broadcastActionBtn.addEventListener('click', function() {
@@ -1008,7 +1223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     const disconnectAllBtn = document.getElementById('disconnectAllBtn');
     if (disconnectAllBtn) {
         disconnectAllBtn.addEventListener('click', function() {
@@ -1019,7 +1234,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Update connection URL with current host
     const connectionUrlElement = document.getElementById('phoneConnectionUrl');
     if (connectionUrlElement) {

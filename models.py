@@ -84,3 +84,41 @@ class SystemAlert(db.Model):
             'timestamp': self.timestamp.isoformat(),
             'is_acknowledged': self.is_acknowledged
         }
+
+class AIAssistant(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    response = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    device_count = db.Column(db.Integer, default=0)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'session_id': self.session_id,
+            'message': self.message,
+            'response': self.response,
+            'timestamp': self.timestamp.isoformat(),
+            'device_count': self.device_count
+        }
+
+class DeviceNotification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    target_ip = db.Column(db.String(45), nullable=False)
+    notification_type = db.Column(db.String(50), default="APP_INSTALL")
+    message = db.Column(db.Text, nullable=False)
+    install_url = db.Column(db.String(500), nullable=False)
+    is_sent = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'target_ip': self.target_ip,
+            'notification_type': self.notification_type,
+            'message': self.message,
+            'install_url': self.install_url,
+            'is_sent': self.is_sent,
+            'timestamp': self.timestamp.isoformat()
+        }

@@ -443,24 +443,24 @@ body {
     .quantum-title {
         font-size: 2rem;
     }
-    
+
     .quantum-container {
         padding: 10px;
     }
-    
+
     .quantum-panel {
         padding: 15px;
     }
-    
+
     .quantum-btn {
         padding: 12px 20px;
         font-size: 0.9rem;
     }
-    
+
     .status-text {
         font-size: 1.4rem;
     }
-    
+
     .metrics-grid {
         grid-template-columns: 1fr;
     }
@@ -661,7 +661,7 @@ body {
         grid-template-columns: 1fr;
         gap: 5px;
     }
-    
+
     .stream-item div {
         text-align: center;
         padding: 2px;
@@ -1119,4 +1119,113 @@ body {
 
 .network-info span {
     font-size: 12px;
+}
+
+/* Device connection styling */
+.device-card {
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid #00ffff;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    transition: all 0.3s ease;
+}
+
+/* AI Assistant styling */
+.ai-assistant-panel {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+    border: 2px solid #00ffff;
+    margin-top: 20px;
+}
+
+.ai-chat-area {
+    height: 200px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.ai-message, .user-message {
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.ai-message {
+    background: rgba(0, 255, 255, 0.1);
+    border-left: 3px solid #00ffff;
+}
+
+.user-message {
+    background: rgba(255, 0, 255, 0.1);
+    border-left: 3px solid #ff00ff;
+    text-align: right;
+}
+
+.ai-error {
+    background: rgba(255, 0, 0, 0.1);
+    border-left: 3px solid #ff0000;
+    color: #ff6b6b;
+}
+
+.ai-input-area {
+    display: flex;
+    gap: 10px;
+}
+
+.ai-input-area input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #00ffff;
+    color: #00ffff;
+    border-radius: 5px;
+    padding: 8px;
+}
+
+/* Auto-install page styling */
+.auto-install-features ul li {
+    margin: 10px 0;
+    padding: 5px;
+}
+
+.auto-install-features .quantum-text {
+    margin-right: 10px;
+}
+
+.auto-install-actions {
+    margin: 20px 0;
+}
+
+.auto-install-info {
+    font-size: 0.9em;
+    color: #aaa;
+}
+
+/* Device summary panel */
+.device-summary-panel {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid #00ffff;
+    margin-top: 15px;
+}
+
+.summary-stats {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    background: rgba(0, 255, 255, 0.1);
+    border-radius: 5px;
+    margin: 5px;
+}
+
+.stat-item i {
+    color: #00ffff;
 }
