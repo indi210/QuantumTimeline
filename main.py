@@ -13,7 +13,7 @@ app.secret_key = os.environ.get("SESSION_SECRET", "quantum-interface-secret-key"
 ROOT_EMAIL = "ervin210@icloud.com"
 HIDDEN_ROOT_KEY = hashlib.sha256(ROOT_EMAIL.encode()).hexdigest()
 
-# QuantumWatch Class - Enhanced version
+# QuantumWatch Class - Advanced Admin Dashboard
 class QuantumWatch:
     def __init__(self, user="Ervin Remus Radosavlevici"):
         self.owner = user
@@ -23,30 +23,200 @@ class QuantumWatch:
         self.activation_count = 0
         self.build_count = 0
         self.signature_count = 0
+        self.quantum_energy = 100
+        self.neural_sync = 0
+        self.matrix_stability = 85
+        self.system_alerts = []
+        self.security_level = "Standard"
+        self.active_protocols = []
+        self.data_streams = []
+        self.threat_level = "Green"
+        self.uptime = 0
+        self.last_sync = time.time()
+        
+        # Admin Dashboard Features
+        self.admin_mode = False
+        self.system_performance = 95
+        self.network_status = "Online"
+        self.cpu_usage = 45
+        self.memory_usage = 67
+        self.storage_usage = 33
+        self.active_users = 1
+        self.total_requests = 0
+        self.error_count = 0
+        self.response_time = 0.125
+        self.bandwidth_usage = 0.5
+        self.system_temperature = 42
+        self.power_consumption = 85
+        self.database_connections = 12
+        self.cache_hit_rate = 94
+        self.service_status = {
+            "Authentication": "Active",
+            "Database": "Active", 
+            "Cache": "Active",
+            "API Gateway": "Active",
+            "File Storage": "Active",
+            "Monitoring": "Active"
+        }
+        self.user_sessions = []
+        self.system_modules = [
+            {"name": "Core Engine", "status": "Running", "version": "v2.1.4"},
+            {"name": "Neural Networks", "status": "Running", "version": "v1.8.2"},
+            {"name": "Quantum Processor", "status": "Running", "version": "v3.0.1"},
+            {"name": "Security Matrix", "status": "Running", "version": "v2.5.3"},
+            {"name": "Data Analytics", "status": "Running", "version": "v1.9.7"},
+            {"name": "Communication Hub", "status": "Running", "version": "v2.3.1"}
+        ]
 
     def activate_interface(self):
         self.status = "Activated"
         self.activation_count += 1
+        self.quantum_energy = min(100, self.quantum_energy + 15)
+        self.neural_sync = min(100, self.neural_sync + 25)
+        self.active_protocols.append("QUANTUM_SYNC")
         self.log_action("Quantum Interface Activated")
+        self.check_system_health()
 
     def build_completed(self):
         self.status = "Build Completed"
         self.build_count += 1
+        self.quantum_energy = max(0, self.quantum_energy - 10)
+        self.matrix_stability = min(100, self.matrix_stability + 5)
+        self.active_protocols.append("BUILD_PROTOCOL")
         self.log_action("Build Status: Completed")
+        self.check_system_health()
 
     def generate_signature(self):
         data = json.dumps({
             "owner": self.owner,
             "status": self.status,
-            "timestamp": self.timestamp
+            "timestamp": self.timestamp,
+            "quantum_energy": self.quantum_energy,
+            "neural_sync": self.neural_sync
         }, sort_keys=True).encode()
         self.signature_count += 1
+        self.quantum_energy = max(0, self.quantum_energy - 5)
+        self.active_protocols.append("CRYPTO_SIGN")
         self.log_action("Digital Signature Generated")
         return hashlib.sha256(data).hexdigest()
+
+    def initiate_neural_scan(self):
+        self.neural_sync = min(100, self.neural_sync + 35)
+        self.active_protocols.append("NEURAL_SCAN")
+        self.log_action("Neural Pattern Scan Initiated")
+        self.check_system_health()
+        return {
+            "patterns_detected": ["ALPHA_WAVE", "BETA_SURGE", "GAMMA_PULSE"],
+            "sync_level": self.neural_sync,
+            "scan_complete": True
+        }
+
+    def quantum_boost(self):
+        self.quantum_energy = 100
+        self.matrix_stability = min(100, self.matrix_stability + 10)
+        self.active_protocols.append("QUANTUM_BOOST")
+        self.log_action("Quantum Energy Boost Applied")
+        self.check_system_health()
+
+    def security_scan(self):
+        import random
+        threats = ["INTRUSION_DETECTED", "FIREWALL_BREACH", "DATA_LEAK", "CLEAN"]
+        threat = random.choice(threats)
+        
+        if threat == "CLEAN":
+            self.threat_level = "Green"
+            self.security_level = "Enhanced"
+            self.log_action("Security Scan: No Threats Detected")
+        else:
+            self.threat_level = "Yellow"
+            self.security_level = "Alert"
+            self.system_alerts.append(f"SECURITY: {threat}")
+            self.log_action(f"Security Scan: {threat}")
+        
+        self.active_protocols.append("SECURITY_SCAN")
+        self.check_system_health()
+        return {"threat_level": self.threat_level, "threat_type": threat}
+
+    def data_stream_analysis(self):
+        import random
+        streams = []
+        for i in range(3):
+            stream = {
+                "id": f"STREAM_{i+1:03d}",
+                "type": random.choice(["NEURAL", "QUANTUM", "MATRIX", "CRYPTO"]),
+                "status": random.choice(["ACTIVE", "IDLE", "PROCESSING"]),
+                "bandwidth": random.randint(50, 100),
+                "latency": random.randint(1, 15)
+            }
+            streams.append(stream)
+        
+        self.data_streams = streams
+        self.active_protocols.append("DATA_ANALYSIS")
+        self.log_action("Data Stream Analysis Complete")
+        return streams
+
+    def matrix_recalibration(self):
+        self.matrix_stability = min(100, self.matrix_stability + 15)
+        self.quantum_energy = max(0, self.quantum_energy - 20)
+        self.active_protocols.append("MATRIX_RECAL")
+        self.log_action("Matrix Recalibration Complete")
+        self.check_system_health()
+
+    def toggle_admin_mode(self):
+        self.admin_mode = not self.admin_mode
+        mode_text = "Enabled" if self.admin_mode else "Disabled"
+        self.log_action(f"Admin Mode {mode_text}")
+        return self.admin_mode
+
+    def system_reboot(self):
+        self.status = "Rebooting"
+        self.quantum_energy = 100
+        self.neural_sync = 0
+        self.matrix_stability = 85
+        self.system_alerts = []
+        self.active_protocols = []
+        self.log_action("System Reboot Initiated")
+        return {"status": "Rebooting", "eta": "30 seconds"}
+
+    def emergency_shutdown(self):
+        self.status = "Emergency Shutdown"
+        self.quantum_energy = 0
+        self.neural_sync = 0
+        self.matrix_stability = 0
+        self.system_alerts.append("EMERGENCY: System Shutdown Activated")
+        self.log_action("Emergency Shutdown Activated")
+        return {"status": "Emergency Shutdown", "reason": "Admin Command"}
+
+    def performance_optimization(self):
+        import random
+        self.system_performance = min(100, self.system_performance + random.randint(3, 8))
+        self.cpu_usage = max(10, self.cpu_usage - random.randint(5, 15))
+        self.memory_usage = max(20, self.memory_usage - random.randint(3, 10))
+        self.cache_hit_rate = min(99, self.cache_hit_rate + random.randint(1, 3))
+        self.log_action("Performance Optimization Applied")
+        return {
+            "performance": self.system_performance,
+            "cpu_usage": self.cpu_usage,
+            "memory_usage": self.memory_usage
+        }
+
+    def check_system_health(self):
+        if self.quantum_energy < 20:
+            self.system_alerts.append("LOW_ENERGY: Quantum Energy Below 20%")
+        if self.matrix_stability < 70:
+            self.system_alerts.append("UNSTABLE: Matrix Stability Critical")
+        if self.neural_sync > 90:
+            self.system_alerts.append("HIGH_SYNC: Neural Synchronization at Maximum")
+        if self.cpu_usage > 85:
+            self.system_alerts.append("HIGH_CPU: CPU Usage Critical")
+        if self.memory_usage > 90:
+            self.system_alerts.append("HIGH_MEMORY: Memory Usage Critical")
 
     def log_action(self, action):
         timestamped = f"{datetime.utcnow().isoformat()}Z: {action}"
         self.actions_log.append(timestamped)
+        if len(self.actions_log) > 100:
+            self.actions_log = self.actions_log[-100:]
 
     def reset_interface(self):
         self.status = "Idle"
@@ -54,6 +224,14 @@ class QuantumWatch:
         self.activation_count = 0
         self.build_count = 0
         self.signature_count = 0
+        self.quantum_energy = 100
+        self.neural_sync = 0
+        self.matrix_stability = 85
+        self.system_alerts = []
+        self.security_level = "Standard"
+        self.active_protocols = []
+        self.data_streams = []
+        self.threat_level = "Green"
         self.log_action("Quantum Interface Reset")
 
     def get_status_data(self):
@@ -63,7 +241,33 @@ class QuantumWatch:
             "build_count": self.build_count,
             "signature_count": self.signature_count,
             "total_actions": len(self.actions_log),
-            "logs": self.actions_log
+            "logs": self.actions_log,
+            "quantum_energy": self.quantum_energy,
+            "neural_sync": self.neural_sync,
+            "matrix_stability": self.matrix_stability,
+            "system_alerts": self.system_alerts,
+            "security_level": self.security_level,
+            "active_protocols": self.active_protocols,
+            "data_streams": self.data_streams,
+            "threat_level": self.threat_level,
+            "uptime": int(time.time() - self.last_sync),
+            "admin_mode": self.admin_mode,
+            "system_performance": self.system_performance,
+            "network_status": self.network_status,
+            "cpu_usage": self.cpu_usage,
+            "memory_usage": self.memory_usage,
+            "storage_usage": self.storage_usage,
+            "active_users": self.active_users,
+            "total_requests": self.total_requests,
+            "error_count": self.error_count,
+            "response_time": self.response_time,
+            "bandwidth_usage": self.bandwidth_usage,
+            "system_temperature": self.system_temperature,
+            "power_consumption": self.power_consumption,
+            "database_connections": self.database_connections,
+            "cache_hit_rate": self.cache_hit_rate,
+            "service_status": self.service_status,
+            "system_modules": self.system_modules
         }
 
 # Initialize the quantum watch
