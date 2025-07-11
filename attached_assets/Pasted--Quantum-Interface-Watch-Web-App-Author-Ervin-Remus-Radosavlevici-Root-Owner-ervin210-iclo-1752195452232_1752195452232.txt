@@ -1,0 +1,103 @@
+
+# Quantum Interface Watch - Web App
+# Author: Ervin Remus Radosavlevici
+# Root Owner: ervin210@icloud.com (hidden)
+# Timestamp: Auto-generated
+
+from flask import Flask, render_template_string, request, jsonify
+from datetime import datetime
+import hashlib
+import json
+import time
+
+app = Flask(__name__)
+
+# Hidden root access logic
+ROOT_EMAIL = "ervin210@icloud.com"
+HIDDEN_ROOT_KEY = hashlib.sha256(ROOT_EMAIL.encode()).hexdigest()
+
+# QuantumWatch Class
+class QuantumWatch:
+    def __init__(self, user="Ervin Remus Radosavlevici"):
+        self.owner = user
+        self.status = "Idle"
+        self.timestamp = time.time()
+        self.actions_log = []
+
+    def activate_interface(self):
+        self.status = "Activated"
+        self.log_action("Quantum Interface Activated")
+
+    def build_completed(self):
+        self.status = "Build Completed"
+        self.log_action("Build Status: Completed")
+
+    def generate_signature(self):
+        data = json.dumps({
+            "owner": self.owner,
+            "status": self.status,
+            "timestamp": self.timestamp
+        }, sort_keys=True).encode()
+        return hashlib.sha256(data).hexdigest()
+
+    def log_action(self, action):
+        timestamped = f"{datetime.utcnow().isoformat()}Z: {action}"
+        self.actions_log.append(timestamped)
+
+watch = QuantumWatch()
+
+# Web Interface Template
+HTML = """
+<!doctype html>
+<html>
+<head>
+    <title>Quantum Interface Watch</title>
+    <style>
+        body { font-family: sans-serif; background: #0a0a0a; color: #0f0; padding: 20px; }
+        h1 { color: #0ff; }
+        button { background: #222; color: #0f0; padding: 10px 20px; margin: 5px; border: 1px solid #0f0; }
+        pre { background: #111; padding: 10px; border: 1px solid #0f0; }
+    </style>
+</head>
+<body>
+    <h1>Quantum Interface Watch</h1>
+    <p>Status: <strong>{{ status }}</strong></p>
+    <form method="POST" action="/activate"><button>Activate Interface</button></form>
+    <form method="POST" action="/build"><button>Complete Build</button></form>
+    <form method="POST" action="/sign"><button>Generate Signature</button></form>
+    <h2>Logs</h2>
+    <pre>{{ logs }}</pre>
+    {% if signature %}
+    <h2>Signature</h2>
+    <pre>{{ signature }}</pre>
+    {% endif %}
+</body>
+</html>
+"""
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    signature = None
+    return render_template_string(HTML, status=watch.status, logs="\n".join(watch.actions_log), signature=signature)
+
+@app.route("/activate", methods=["POST"])
+def activate():
+    watch.activate_interface()
+    return render_template_string(HTML, status=watch.status, logs="\n".join(watch.actions_log), signature=None)
+
+@app.route("/build", methods=["POST"])
+def build():
+    watch.build_completed()
+    return render_template_string(HTML, status=watch.status, logs="\n".join(watch.actions_log), signature=None)
+
+@app.route("/sign", methods=["POST"])
+def sign():
+    sig = watch.generate_signature()
+    return render_template_string(HTML, status=watch.status, logs="\n".join(watch.actions_log), signature=sig)
+
+@app.route("/root-key", methods=["GET"])
+def root_key():
+    return jsonify({"root_hash": HIDDEN_ROOT_KEY})
+
+if __name__ == "__main__":
+    app.run(debug=True)
