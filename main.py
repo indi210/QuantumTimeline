@@ -1,13 +1,30 @@
 import os
 from flask import Flask, render_template, request, jsonify
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from datetime import datetime
 import hashlib
 import json
 import time
+import uuid
+from models import db, ConnectedDevice, DeviceAction, SystemAlert
 
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "quantum-interface-secret-key")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///quantum_devices.db")
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_recycle": 300,
+    "pool_pre_ping": True,
+}
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Initialize extensions
+db.init_app(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Create database tables
+with app.app_context():
+    db.create_all()
 
 # Hidden root access logic
 ROOT_EMAIL = "ervin210@icloud.com"
@@ -67,6 +84,8 @@ class QuantumWatch:
             {"name": "Data Analytics", "status": "Running", "version": "v1.9.7"},
             {"name": "Communication Hub", "status": "Running", "version": "v2.3.1"}
         ]
+        self.connected_devices = []
+        self.device_sync_enabled = True
 
     def activate_interface(self):
         self.status = "Activated"
@@ -267,8 +286,204 @@ class QuantumWatch:
             "database_connections": self.database_connections,
             "cache_hit_rate": self.cache_hit_rate,
             "service_status": self.service_status,
-            "system_modules": self.system_modules
+            "system_modules": self.system_modules,
+            "connected_devices": self.connected_devices,
+            "device_sync_enabled": self.device_sync_enabled
         }
+
+# Device Management Functions
+def detect_device_type(user_agent):
+    """Detect device type from user agent string"""
+    user_agent = user_agent.lower()
+    if 'mobile' in user_agent or 'android' in user_agent or 'iphone' in user_agent:
+        return 'phone'
+    elif 'tablet' in user_agent or 'ipad' in user_agent:
+        return 'tablet'
+    elif 'watch' in user_agent or 'wearable' in user_agent:
+        return 'watch'
+    else:
+        return 'computer'
+
+def register_device(device_data, ip_address, user_agent):
+    """Register a new device or update existing device"""
+    device_type = detect_device_type(user_agent)
+    
+    # Check if device already exists
+    device = ConnectedDevice.query.filter_by(device_id=device_data.get('device_id')).first()
+    
+    if device:
+        # Update existing device
+        device.last_seen = datetime.utcnow()
+        device.is_active = True
+        device.ip_address = ip_address
+        device.user_agent = user_agent
+    else:
+        # Create new device
+        device = ConnectedDevice(
+            device_id=device_data.get('device_id', str(uuid.uuid4())),
+            device_name=device_data.get('device_name', f"Unknown {device_type.title()}"),
+            device_type=device_type,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+        db.session.add(device)
+    
+    db.session.commit()
+    return device
+
+def sync_device_data(device_id, data):
+    """Sync device data with quantum watch"""
+    device = ConnectedDevice.query.filter_by(device_id=device_id).first()
+    if device:
+        # Update device metrics
+        device.battery_level = data.get('battery_level', device.battery_level)
+        device.cpu_usage = data.get('cpu_usage', device.cpu_usage)
+        device.memory_usage = data.get('memory_usage', device.memory_usage)
+        device.storage_usage = data.get('storage_usage', device.storage_usage)
+        device.network_status = data.get('network_status', device.network_status)
+        
+        # Update quantum data
+        device.quantum_energy = data.get('quantum_energy', device.quantum_energy)
+        device.neural_sync = data.get('neural_sync', device.neural_sync)
+        device.matrix_stability = data.get('matrix_stability', device.matrix_stability)
+        device.threat_level = data.get('threat_level', device.threat_level)
+        
+        device.last_seen = datetime.utcnow()
+        db.session.commit()
+        
+        # Update main quantum watch if sync is enabled
+        if watch.device_sync_enabled:
+            watch.quantum_energy = max(watch.quantum_energy, device.quantum_energy)
+            watch.neural_sync = max(watch.neural_sync, device.neural_sync)
+            watch.matrix_stability = max(watch.matrix_stability, device.matrix_stability)
+            
+            # Sync threat level (take highest priority)
+            threat_priority = {"Green": 0, "Yellow": 1, "Red": 2}
+            if threat_priority.get(device.threat_level, 0) > threat_priority.get(watch.threat_level, 0):
+                watch.threat_level = device.threat_level
+        
+        return device
+    return None
+
+# SocketIO Event Handlers
+@socketio.on('connect')
+def handle_connect():
+    """Handle new device connection"""
+    device_id = request.sid
+    ip_address = request.environ.get('REMOTE_ADDR', 'unknown')
+    user_agent = request.headers.get('User-Agent', '')
+    
+    # Register device
+    device_data = {
+        'device_id': device_id,
+        'device_name': f"Device {device_id[:8]}"
+    }
+    
+    device = register_device(device_data, ip_address, user_agent)
+    
+    # Join device room
+    join_room(f"device_{device_id}")
+    
+    # Broadcast device connection
+    emit('device_connected', {
+        'device': device.to_dict(),
+        'message': f"{device.device_name} connected"
+    }, broadcast=True)
+    
+    print(f"Device connected: {device.device_name} ({device.device_type})")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    """Handle device disconnection"""
+    device_id = request.sid
+    device = ConnectedDevice.query.filter_by(device_id=device_id).first()
+    
+    if device:
+        device.is_active = False
+        db.session.commit()
+        
+        # Broadcast device disconnection
+        emit('device_disconnected', {
+            'device_id': device_id,
+            'message': f"{device.device_name} disconnected"
+        }, broadcast=True)
+        
+        print(f"Device disconnected: {device.device_name}")
+
+@socketio.on('sync_device_data')
+def handle_sync_device_data(data):
+    """Handle device data synchronization"""
+    device_id = request.sid
+    device = sync_device_data(device_id, data)
+    
+    if device:
+        # Broadcast updated device data
+        emit('device_data_updated', {
+            'device': device.to_dict(),
+            'quantum_watch_data': watch.get_status_data()
+        }, broadcast=True)
+
+@socketio.on('device_action')
+def handle_device_action(data):
+    """Handle device actions (activate, scan, etc.)"""
+    device_id = request.sid
+    action_type = data.get('action_type')
+    action_data = data.get('action_data', {})
+    
+    # Log device action
+    device_action = DeviceAction(
+        device_id=device_id,
+        action_type=action_type,
+        action_data=json.dumps(action_data)
+    )
+    db.session.add(device_action)
+    db.session.commit()
+    
+    # Execute action on quantum watch
+    result = execute_device_action(action_type, action_data)
+    
+    # Broadcast action result
+    emit('action_result', {
+        'action_type': action_type,
+        'result': result,
+        'device_id': device_id
+    }, broadcast=True)
+
+def execute_device_action(action_type, action_data):
+    """Execute device action on quantum watch"""
+    if action_type == 'activate':
+        watch.activate_interface()
+        return {'success': True, 'message': 'Interface activated'}
+    elif action_type == 'neural_scan':
+        return watch.initiate_neural_scan()
+    elif action_type == 'quantum_boost':
+        watch.quantum_boost()
+        return {'success': True, 'message': 'Quantum boost applied'}
+    elif action_type == 'security_scan':
+        return watch.security_scan()
+    elif action_type == 'matrix_recalibration':
+        watch.matrix_recalibration()
+        return {'success': True, 'message': 'Matrix recalibrated'}
+    else:
+        return {'success': False, 'message': 'Unknown action'}
+
+@socketio.on('get_all_devices')
+def handle_get_all_devices():
+    """Get all connected devices"""
+    devices = ConnectedDevice.query.all()
+    emit('all_devices', {
+        'devices': [device.to_dict() for device in devices],
+        'count': len(devices)
+    })
+
+@socketio.on('toggle_device_sync')
+def handle_toggle_device_sync():
+    """Toggle device synchronization"""
+    watch.device_sync_enabled = not watch.device_sync_enabled
+    emit('device_sync_toggled', {
+        'enabled': watch.device_sync_enabled,
+        'message': f"Device sync {'enabled' if watch.device_sync_enabled else 'disabled'}"
+    }, broadcast=True)
 
 # Initialize the quantum watch
 watch = QuantumWatch()
@@ -520,6 +735,109 @@ def api_performance_optimization():
             "message": f"Performance optimization failed: {str(e)}"
         }), 500
 
+# Device Connection API Endpoints
+@app.route("/api/devices", methods=["GET"])
+def api_get_devices():
+    try:
+        devices = ConnectedDevice.query.all()
+        return jsonify({
+            "success": True,
+            "devices": [device.to_dict() for device in devices],
+            "count": len(devices)
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Failed to get devices: {str(e)}"
+        }), 500
+
+@app.route("/api/device/<device_id>", methods=["GET"])
+def api_get_device(device_id):
+    try:
+        device = ConnectedDevice.query.filter_by(device_id=device_id).first()
+        if device:
+            return jsonify({
+                "success": True,
+                "device": device.to_dict()
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Device not found"
+            }), 404
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Failed to get device: {str(e)}"
+        }), 500
+
+@app.route("/api/device/<device_id>/sync", methods=["POST"])
+def api_sync_device(device_id):
+    try:
+        data = request.get_json()
+        device = sync_device_data(device_id, data)
+        if device:
+            return jsonify({
+                "success": True,
+                "message": "Device data synchronized",
+                "device": device.to_dict()
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Device not found"
+            }), 404
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Failed to sync device: {str(e)}"
+        }), 500
+
+@app.route("/api/device-sync/toggle", methods=["POST"])
+def api_toggle_device_sync():
+    try:
+        watch.device_sync_enabled = not watch.device_sync_enabled
+        return jsonify({
+            "success": True,
+            "message": f"Device sync {'enabled' if watch.device_sync_enabled else 'disabled'}",
+            "enabled": watch.device_sync_enabled
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Failed to toggle device sync: {str(e)}"
+        }), 500
+
+@app.route("/api/device/<device_id>/actions", methods=["GET"])
+def api_get_device_actions(device_id):
+    try:
+        actions = DeviceAction.query.filter_by(device_id=device_id).order_by(DeviceAction.timestamp.desc()).limit(50).all()
+        return jsonify({
+            "success": True,
+            "actions": [action.to_dict() for action in actions],
+            "count": len(actions)
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Failed to get device actions: {str(e)}"
+        }), 500
+
+@app.route("/api/alerts", methods=["GET"])
+def api_get_alerts():
+    try:
+        alerts = SystemAlert.query.filter_by(is_acknowledged=False).order_by(SystemAlert.timestamp.desc()).all()
+        return jsonify({
+            "success": True,
+            "alerts": [alert.to_dict() for alert in alerts],
+            "count": len(alerts)
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Failed to get alerts: {str(e)}"
+        }), 500
+
 @app.route("/root-access", methods=["GET"])
 def root_access():
     try:
@@ -566,4 +884,4 @@ def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    socketio.run(app, debug=True, host="0.0.0.0", port=5000)

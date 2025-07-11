@@ -303,6 +303,114 @@
             </div>
         </div>
 
+        <!-- Connected Devices Panel -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel quantum-panel-info">
+                    <h3><i class="fas fa-mobile-alt"></i> Connected Devices</h3>
+                    <div class="device-controls mb-3">
+                        <button class="quantum-btn quantum-btn-outline" id="deviceSyncToggleBtn">
+                            <i class="fas fa-sync"></i>
+                            <span>Toggle Device Sync</span>
+                            <div class="btn-glow"></div>
+                        </button>
+                        <button class="quantum-btn quantum-btn-info" id="refreshDevicesBtn">
+                            <i class="fas fa-refresh"></i>
+                            <span>Refresh Devices</span>
+                            <div class="btn-glow"></div>
+                        </button>
+                        <button class="quantum-btn quantum-btn-success" id="scanDevicesBtn">
+                            <i class="fas fa-search"></i>
+                            <span>Scan for Devices</span>
+                            <div class="btn-glow"></div>
+                        </button>
+                    </div>
+                    <div class="device-sync-status" id="deviceSyncStatus">
+                        <span class="sync-indicator"></span>
+                        <span>Device Sync: <span id="syncStatusText">Enabled</span></span>
+                    </div>
+                    <div class="connected-devices-grid" id="connectedDevicesGrid">
+                        <!-- Connected devices will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Actions Panel -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel">
+                    <h3><i class="fas fa-cogs"></i> Device Actions & Sync</h3>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-primary w-100" id="syncAllDevicesBtn">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Sync All Devices</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-warning w-100" id="broadcastActionBtn">
+                                <i class="fas fa-broadcast-tower"></i>
+                                <span>Broadcast Action</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-danger w-100" id="disconnectAllBtn">
+                                <i class="fas fa-power-off"></i>
+                                <span>Disconnect All</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="device-actions-log" id="deviceActionsLog">
+                        <h4>Recent Device Actions</h4>
+                        <div class="actions-display" id="actionsDisplay">
+                            <!-- Device actions will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Connection Instructions -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel quantum-panel-info">
+                    <h3><i class="fas fa-question-circle"></i> Connect Your Devices</h3>
+                    <div class="connection-instructions">
+                        <div class="instruction-item">
+                            <h4><i class="fas fa-mobile-alt"></i> Phone Connection</h4>
+                            <p>Open your phone's browser and navigate to:</p>
+                            <div class="connection-url">
+                                <code id="phoneConnectionUrl">http://localhost:5000</code>
+                                <button class="copy-btn" onclick="copyToClipboard('phoneConnectionUrl')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="instruction-item">
+                            <h4><i class="fas fa-tablet-alt"></i> Tablet Connection</h4>
+                            <p>Connect your tablet using the same URL. The system will automatically detect your device type.</p>
+                        </div>
+                        <div class="instruction-item">
+                            <h4><i class="fas fa-laptop"></i> Computer Connection</h4>
+                            <p>Open a new browser window or tab to connect another computer to the quantum network.</p>
+                        </div>
+                        <div class="instruction-item">
+                            <h4><i class="fas fa-wifi"></i> Network Status</h4>
+                            <p>All devices must be on the same network for optimal synchronization.</p>
+                            <div class="network-info">
+                                <span>Network: <span id="networkName">Local Network</span></span>
+                                <span>Status: <span id="networkStatus" class="status-active">Active</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- System Alerts -->
         <div class="row justify-content-center mb-4">
             <div class="col-lg-10">
