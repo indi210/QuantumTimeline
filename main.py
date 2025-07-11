@@ -365,6 +365,161 @@ def api_status():
             "message": f"Status retrieval failed: {str(e)}"
         }), 500
 
+@app.route("/api/neural-scan", methods=["POST"])
+def api_neural_scan():
+    try:
+        result = watch.initiate_neural_scan()
+        return jsonify({
+            "success": True,
+            "message": "Neural Scan Complete",
+            "scan_results": result,
+            "neural_sync": watch.neural_sync
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Neural scan failed: {str(e)}"
+        }), 500
+
+@app.route("/api/quantum-boost", methods=["POST"])
+def api_quantum_boost():
+    try:
+        watch.quantum_boost()
+        return jsonify({
+            "success": True,
+            "message": "Quantum Energy Boosted to Maximum",
+            "quantum_energy": watch.quantum_energy,
+            "matrix_stability": watch.matrix_stability
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Quantum boost failed: {str(e)}"
+        }), 500
+
+@app.route("/api/security-scan", methods=["POST"])
+def api_security_scan():
+    try:
+        result = watch.security_scan()
+        return jsonify({
+            "success": True,
+            "message": "Security Scan Complete",
+            "scan_results": result,
+            "threat_level": watch.threat_level,
+            "security_level": watch.security_level
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Security scan failed: {str(e)}"
+        }), 500
+
+@app.route("/api/data-analysis", methods=["POST"])
+def api_data_analysis():
+    try:
+        streams = watch.data_stream_analysis()
+        return jsonify({
+            "success": True,
+            "message": "Data Stream Analysis Complete",
+            "data_streams": streams
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Data analysis failed: {str(e)}"
+        }), 500
+
+@app.route("/api/matrix-recalibration", methods=["POST"])
+def api_matrix_recalibration():
+    try:
+        watch.matrix_recalibration()
+        return jsonify({
+            "success": True,
+            "message": "Matrix Recalibration Complete",
+            "matrix_stability": watch.matrix_stability,
+            "quantum_energy": watch.quantum_energy
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Matrix recalibration failed: {str(e)}"
+        }), 500
+
+@app.route("/api/clear-alerts", methods=["POST"])
+def api_clear_alerts():
+    try:
+        watch.system_alerts = []
+        watch.log_action("System Alerts Cleared")
+        return jsonify({
+            "success": True,
+            "message": "All System Alerts Cleared"
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Alert clearing failed: {str(e)}"
+        }), 500
+
+@app.route("/api/admin-toggle", methods=["POST"])
+def api_admin_toggle():
+    try:
+        admin_mode = watch.toggle_admin_mode()
+        return jsonify({
+            "success": True,
+            "message": f"Admin Mode {'Enabled' if admin_mode else 'Disabled'}",
+            "admin_mode": admin_mode
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Admin toggle failed: {str(e)}"
+        }), 500
+
+@app.route("/api/system-reboot", methods=["POST"])
+def api_system_reboot():
+    try:
+        result = watch.system_reboot()
+        return jsonify({
+            "success": True,
+            "message": "System Reboot Initiated",
+            "reboot_info": result
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"System reboot failed: {str(e)}"
+        }), 500
+
+@app.route("/api/emergency-shutdown", methods=["POST"])
+def api_emergency_shutdown():
+    try:
+        result = watch.emergency_shutdown()
+        return jsonify({
+            "success": True,
+            "message": "Emergency Shutdown Activated",
+            "shutdown_info": result
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Emergency shutdown failed: {str(e)}"
+        }), 500
+
+@app.route("/api/performance-optimization", methods=["POST"])
+def api_performance_optimization():
+    try:
+        result = watch.performance_optimization()
+        return jsonify({
+            "success": True,
+            "message": "Performance Optimization Applied",
+            "optimization_results": result
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Performance optimization failed: {str(e)}"
+        }), 500
+
 @app.route("/root-access", methods=["GET"])
 def root_access():
     try:

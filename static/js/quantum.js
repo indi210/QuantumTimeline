@@ -29,7 +29,12 @@ class QuantumInterface {
         document.getElementById('securityScanBtn').addEventListener('click', () => this.performSecurityScan());
         document.getElementById('dataAnalysisBtn').addEventListener('click', () => this.performDataAnalysis());
         document.getElementById('matrixRecalBtn').addEventListener('click', () => this.performMatrixRecalibration());
-        document.getElementById('clearAlertsBtn').addEventListener('click', () => this.clearSystemAlerts());
+        
+        // Admin dashboard buttons
+        document.getElementById('adminToggleBtn').addEventListener('click', () => this.toggleAdminMode());
+        document.getElementById('performanceOptBtn').addEventListener('click', () => this.performanceOptimization());
+        document.getElementById('systemRebootBtn').addEventListener('click', () => this.systemReboot());
+        document.getElementById('emergencyShutdownBtn').addEventListener('click', () => this.emergencyShutdown());
     }
 
     showLoading() {
@@ -334,6 +339,58 @@ class QuantumInterface {
         }
     }
 
+    async toggleAdminMode() {
+        try {
+            const result = await this.makeRequest('/api/admin-toggle');
+            if (result.success) {
+                this.showToast(result.message, 'warning');
+                this.updateAdminMode(result.admin_mode);
+                this.refreshLogs();
+            }
+        } catch (error) {
+            console.error('Admin toggle failed:', error);
+        }
+    }
+
+    async performanceOptimization() {
+        try {
+            const result = await this.makeRequest('/api/performance-optimization');
+            if (result.success) {
+                this.showToast(result.message, 'success');
+                this.updateMetrics();
+                this.refreshLogs();
+            }
+        } catch (error) {
+            console.error('Performance optimization failed:', error);
+        }
+    }
+
+    async systemReboot() {
+        try {
+            const result = await this.makeRequest('/api/system-reboot');
+            if (result.success) {
+                this.showToast(result.message, 'warning');
+                this.updateMetrics();
+                this.refreshLogs();
+            }
+        } catch (error) {
+            console.error('System reboot failed:', error);
+        }
+    }
+
+    async emergencyShutdown() {
+        try {
+            const result = await this.makeRequest('/api/emergency-shutdown');
+            if (result.success) {
+                this.showToast(result.message, 'danger');
+                this.updateMetrics();
+                this.refreshLogs();
+            }
+        } catch (error) {
+            console.error('Emergency shutdown failed:', error);
+        }
+    }
+
     displayNeuralResults(results) {
         const signaturePanel = document.getElementById('signaturePanel');
         const signatureDisplay = document.getElementById('signatureDisplay');
@@ -434,21 +491,71 @@ class QuantumInterface {
         });
     }
 
+    updateAdminMode(adminMode) {
+        const adminToggleBtn = document.getElementById('adminToggleBtn');
+        const icon = adminToggleBtn.querySelector('i');
+        
+        if (adminMode) {
+            icon.className = 'fas fa-toggle-on';
+            adminToggleBtn.classList.add('admin-mode-active');
+        } else {
+            icon.className = 'fas fa-toggle-off';
+            adminToggleBtn.classList.remove('admin-mode-active');
+        }
+    }
+
     async updateMetrics() {
         try {
             const result = await this.makeRequest('/api/status', 'GET');
             
             // Update advanced metrics display
-            document.getElementById('quantumEnergy').textContent = result.quantum_energy + '%';
-            document.getElementById('neuralSync').textContent = result.neural_sync + '%';
-            document.getElementById('matrixStability').textContent = result.matrix_stability + '%';
-            document.getElementById('threatLevel').textContent = result.threat_level;
+            const quantumEnergyEl = document.getElementById('quantumEnergy');
+            const neuralSyncEl = document.getElementById('neuralSync');
+            const matrixStabilityEl = document.getElementById('matrixStability');
+            const threatLevelEl = document.getElementById('threatLevel');
+            
+            if (quantumEnergyEl) quantumEnergyEl.textContent = result.quantum_energy + '%';
+            if (neuralSyncEl) neuralSyncEl.textContent = result.neural_sync + '%';
+            if (matrixStabilityEl) matrixStabilityEl.textContent = result.matrix_stability + '%';
+            if (threatLevelEl) threatLevelEl.textContent = result.threat_level;
+            
+            // Update admin metrics
+            const cpuValue = document.getElementById('cpuValue');
+            const memoryValue = document.getElementById('memoryValue');
+            const storageValue = document.getElementById('storageValue');
+            const systemPerformance = document.getElementById('systemPerformance');
+            const systemTemperature = document.getElementById('systemTemperature');
+            const powerConsumption = document.getElementById('powerConsumption');
+            const cacheHitRate = document.getElementById('cacheHitRate');
+            
+            if (cpuValue) cpuValue.textContent = result.cpu_usage + '%';
+            if (memoryValue) memoryValue.textContent = result.memory_usage + '%';
+            if (storageValue) storageValue.textContent = result.storage_usage + '%';
+            if (systemPerformance) systemPerformance.textContent = result.system_performance + '%';
+            if (systemTemperature) systemTemperature.textContent = result.system_temperature + '°C';
+            if (powerConsumption) powerConsumption.textContent = result.power_consumption + 'W';
+            if (cacheHitRate) cacheHitRate.textContent = result.cache_hit_rate + '%';
+            
+            // Update progress bars
+            const cpuBar = document.getElementById('cpuBar');
+            const memoryBar = document.getElementById('memoryBar');
+            const storageBar = document.getElementById('storageBar');
+            
+            if (cpuBar) cpuBar.style.width = result.cpu_usage + '%';
+            if (memoryBar) memoryBar.style.width = result.memory_usage + '%';
+            if (storageBar) storageBar.style.width = result.storage_usage + '%';
             
             // Update alerts
             this.updateAlerts(result.system_alerts);
             
             // Update data streams
-            this.displayDataStreams(result.data_streams);
+            const dataStreamsDisplay = document.getElementById('dataStreamsDisplay');
+            if (dataStreamsDisplay) {
+                this.displayDataStreams(result.data_streams);
+            }
+            
+            // Update admin mode
+            this.updateAdminMode(result.admin_mode);
             
         } catch (error) {
             console.error('Status update failed:', error);

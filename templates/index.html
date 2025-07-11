@@ -75,7 +75,7 @@
         <div class="row justify-content-center mb-4">
             <div class="col-lg-10">
                 <div class="quantum-panel">
-                    <h3><i class="fas fa-gamepad"></i> Control Interface</h3>
+                    <h3><i class="fas fa-gamepad"></i> Core Control Interface</h3>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <button class="quantum-btn quantum-btn-primary w-100" id="activateBtn">
@@ -151,6 +151,153 @@
                                 <div class="btn-glow"></div>
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard Panel -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel quantum-panel-danger">
+                    <h3><i class="fas fa-user-shield"></i> Admin Dashboard</h3>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-outline w-100" id="adminToggleBtn">
+                                <i class="fas fa-toggle-off"></i>
+                                <span>Toggle Admin Mode</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-success w-100" id="performanceOptBtn">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Optimize Performance</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="quantum-btn quantum-btn-warning w-100" id="systemRebootBtn">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>System Reboot</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <button class="quantum-btn quantum-btn-danger w-100" id="emergencyShutdownBtn">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Emergency Shutdown</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <button class="quantum-btn quantum-btn-outline w-100" id="rootAccessBtn">
+                                <i class="fas fa-key"></i>
+                                <span>Root Access</span>
+                                <div class="btn-glow"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Performance Metrics -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel">
+                    <h3><i class="fas fa-server"></i> System Performance</h3>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="performance-metric">
+                                <h4>CPU Usage</h4>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="cpuBar" style="width: {{ watch.cpu_usage }}%"></div>
+                                </div>
+                                <span class="metric-value" id="cpuValue">{{ watch.cpu_usage }}%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="performance-metric">
+                                <h4>Memory Usage</h4>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="memoryBar" style="width: {{ watch.memory_usage }}%"></div>
+                                </div>
+                                <span class="metric-value" id="memoryValue">{{ watch.memory_usage }}%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="performance-metric">
+                                <h4>Storage Usage</h4>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="storageBar" style="width: {{ watch.storage_usage }}%"></div>
+                                </div>
+                                <span class="metric-value" id="storageValue">{{ watch.storage_usage }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <div class="admin-metric">
+                                <span class="metric-label">System Performance:</span>
+                                <span class="metric-value" id="systemPerformance">{{ watch.system_performance }}%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="admin-metric">
+                                <span class="metric-label">Temperature:</span>
+                                <span class="metric-value" id="systemTemperature">{{ watch.system_temperature }}°C</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="admin-metric">
+                                <span class="metric-label">Power Usage:</span>
+                                <span class="metric-value" id="powerConsumption">{{ watch.power_consumption }}W</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="admin-metric">
+                                <span class="metric-label">Cache Hit Rate:</span>
+                                <span class="metric-value" id="cacheHitRate">{{ watch.cache_hit_rate }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Status -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel">
+                    <h3><i class="fas fa-network-wired"></i> Service Status</h3>
+                    <div class="service-grid" id="serviceGrid">
+                        {% for service, status in watch.service_status.items() %}
+                        <div class="service-item">
+                            <div class="service-name">{{ service }}</div>
+                            <div class="service-status status-{{ status.lower() }}">{{ status }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Modules -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="quantum-panel">
+                    <h3><i class="fas fa-microchip"></i> System Modules</h3>
+                    <div class="modules-display" id="modulesDisplay">
+                        {% for module in watch.system_modules %}
+                        <div class="module-item">
+                            <div class="module-name">{{ module.name }}</div>
+                            <div class="module-status status-{{ module.status.lower() }}">{{ module.status }}</div>
+                            <div class="module-version">{{ module.version }}</div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
