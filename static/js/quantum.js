@@ -638,14 +638,402 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Device Management Functions
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('URL copied to clipboard!');
+    });
+}
+
+// Socket.IO Integration
+let socket;
+let connectedDevices = [];
+
+function initializeSocket() {
+    socket = io();
+    
+    socket.on('connect', () => {
+        console.log('Connected to server');
+        loadConnectedDevices();
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+    });
+    
+    socket.on('device_connected', (data) => {
+        console.log('Device connected:', data);
+        addDeviceToGrid(data.device);
+        showDeviceNotification(data.message, 'success');
+    });
+    
+    socket.on('device_disconnected', (data) => {
+        console.log('Device disconnected:', data);
+        removeDeviceFromGrid(data.device_id);
+        showDeviceNotification(data.message, 'warning');
+    });
+    
+    socket.on('device_data_updated', (data) => {
+        console.log('Device data updated:', data);
+        updateDeviceInGrid(data.device);
+    });
+    
+    socket.on('action_result', (data) => {
+        console.log('Action result:', data);
+        addActionToLog(data);
+    });
+    
+    socket.on('device_sync_toggled', (data) => {
+        console.log('Device sync toggled:', data);
+        updateSyncStatus(data.enabled);
+        showDeviceNotification(data.message, 'info');
+    });
+    
+    socket.on('all_devices', (data) => {
+        console.log('All devices:', data);
+        connectedDevices = data.devices;
+        renderDevicesGrid();
+    });
+}
+
+function loadConnectedDevices() {
+    fetch('/api/devices')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                connectedDevices = data.devices;
+                renderDevicesGrid();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading devices:', error);
+        });
+}
+
+function renderDevicesGrid() {
+    const grid = document.getElementById('connectedDevicesGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    
+    if (connectedDevices.length === 0) {
+        grid.innerHTML = `
+            <div class="no-devices">
+                <i class="fas fa-mobile-alt"></i>
+                <p>No devices connected</p>
+                <p>Use the instructions below to connect your devices</p>
+            </div>
+        `;
+        return;
+    }
+    
+    connectedDevices.forEach(device => {
+        const deviceCard = createDeviceCard(device);
+        grid.appendChild(deviceCard);
+    });
+}
+
+function createDeviceCard(device) {
+    const card = document.createElement('div');
+    card.className = `device-card ${device.is_active ? 'online' : 'offline'}`;
+    card.id = `device-${device.device_id}`;
+    
+    const deviceIcon = getDeviceIcon(device.device_type);
+    const connectionTime = new Date(device.connected_at).toLocaleString();
+    const lastSeen = new Date(device.last_seen).toLocaleString();
+    
+    card.innerHTML = `
+        <div class="device-header">
+            <div class="device-name">
+                <i class="${deviceIcon}"></i>
+                ${device.device_name}
+            </div>
+            <div class="device-type ${device.device_type}">${device.device_type}</div>
+        </div>
+        <div class="device-status ${device.is_active ? 'online' : 'offline'}">
+            Status: ${device.is_active ? 'Online' : 'Offline'}
+        </div>
+        <div class="device-info">
+            <small>IP: ${device.ip_address}</small><br>
+            <small>Connected: ${connectionTime}</small><br>
+            <small>Last Seen: ${lastSeen}</small>
+        </div>
+        <div class="device-metrics">
+            <div class="device-metric">
+                <div class="device-metric-label">Battery</div>
+                <div class="device-metric-value">${device.battery_level}%</div>
+            </div>
+            <div class="device-metric">
+                <div class="device-metric-label">CPU</div>
+                <div class="device-metric-value">${device.cpu_usage}%</div>
+            </div>
+            <div class="device-metric">
+                <div class="device-metric-label">Memory</div>
+                <div class="device-metric-value">${device.memory_usage}%</div>
+            </div>
+            <div class="device-metric">
+                <div class="device-metric-label">Quantum</div>
+                <div class="device-metric-value">${device.quantum_energy}%</div>
+            </div>
+        </div>
+        <div class="device-actions">
+            <button class="device-action-btn" onclick="syncDevice('${device.device_id}')">
+                <i class="fas fa-sync"></i> Sync
+            </button>
+            <button class="device-action-btn" onclick="sendActionToDevice('${device.device_id}', 'activate')">
+                <i class="fas fa-power-off"></i> Activate
+            </button>
+            <button class="device-action-btn" onclick="sendActionToDevice('${device.device_id}', 'neural_scan')">
+                <i class="fas fa-brain"></i> Scan
+            </button>
+            <button class="device-action-btn" onclick="disconnectDevice('${device.device_id}')">
+                <i class="fas fa-times"></i> Disconnect
+            </button>
+        </div>
+    `;
+    
+    return card;
+}
+
+function getDeviceIcon(deviceType) {
+    switch(deviceType) {
+        case 'phone': return 'fas fa-mobile-alt';
+        case 'tablet': return 'fas fa-tablet-alt';
+        case 'watch': return 'fas fa-clock';
+        case 'computer': return 'fas fa-desktop';
+        default: return 'fas fa-question';
+    }
+}
+
+function addDeviceToGrid(device) {
+    const existingIndex = connectedDevices.findIndex(d => d.device_id === device.device_id);
+    if (existingIndex !== -1) {
+        connectedDevices[existingIndex] = device;
+    } else {
+        connectedDevices.push(device);
+    }
+    renderDevicesGrid();
+}
+
+function removeDeviceFromGrid(deviceId) {
+    connectedDevices = connectedDevices.filter(d => d.device_id !== deviceId);
+    renderDevicesGrid();
+}
+
+function updateDeviceInGrid(device) {
+    const existingIndex = connectedDevices.findIndex(d => d.device_id === device.device_id);
+    if (existingIndex !== -1) {
+        connectedDevices[existingIndex] = device;
+        renderDevicesGrid();
+    }
+}
+
+function syncDevice(deviceId) {
+    // Generate some realistic device data
+    const syncData = {
+        battery_level: Math.floor(Math.random() * 100) + 1,
+        cpu_usage: Math.floor(Math.random() * 80) + 10,
+        memory_usage: Math.floor(Math.random() * 90) + 10,
+        quantum_energy: Math.floor(Math.random() * 100) + 1,
+        neural_sync: Math.floor(Math.random() * 100),
+        matrix_stability: Math.floor(Math.random() * 100) + 50,
+        threat_level: ['Green', 'Yellow', 'Red'][Math.floor(Math.random() * 3)]
+    };
+    
+    fetch(`/api/device/${deviceId}/sync`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(syncData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showDeviceNotification(`Device ${deviceId.substr(0, 8)} synced successfully`, 'success');
+            updateDeviceInGrid(data.device);
+        }
+    })
+    .catch(error => {
+        console.error('Error syncing device:', error);
+        showDeviceNotification('Device sync failed', 'error');
+    });
+}
+
+function sendActionToDevice(deviceId, actionType) {
+    if (socket) {
+        socket.emit('device_action', {
+            device_id: deviceId,
+            action_type: actionType,
+            action_data: {}
+        });
+        showDeviceNotification(`Action "${actionType}" sent to device`, 'info');
+    }
+}
+
+function disconnectDevice(deviceId) {
+    // Mark device as inactive
+    const device = connectedDevices.find(d => d.device_id === deviceId);
+    if (device) {
+        device.is_active = false;
+        updateDeviceInGrid(device);
+        showDeviceNotification(`Device ${device.device_name} disconnected`, 'warning');
+    }
+}
+
+function showDeviceNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `device-notification ${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: 1px solid #00ff41;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function updateSyncStatus(enabled) {
+    const syncIndicator = document.querySelector('.sync-indicator');
+    const syncStatusText = document.getElementById('syncStatusText');
+    
+    if (syncIndicator && syncStatusText) {
+        if (enabled) {
+            syncIndicator.classList.remove('disabled');
+            syncStatusText.textContent = 'Enabled';
+        } else {
+            syncIndicator.classList.add('disabled');
+            syncStatusText.textContent = 'Disabled';
+        }
+    }
+}
+
+function addActionToLog(actionData) {
+    const actionsDisplay = document.getElementById('actionsDisplay');
+    if (!actionsDisplay) return;
+    
+    const actionEntry = document.createElement('div');
+    actionEntry.className = 'action-entry';
+    
+    const timestamp = new Date().toLocaleTimeString();
+    actionEntry.innerHTML = `
+        <div class="action-device">${actionData.device_id.substr(0, 8)}</div>
+        <div class="action-type">${actionData.action_type}</div>
+        <div class="action-timestamp">${timestamp}</div>
+    `;
+    
+    actionsDisplay.insertBefore(actionEntry, actionsDisplay.firstChild);
+    
+    // Keep only last 10 actions
+    while (actionsDisplay.children.length > 10) {
+        actionsDisplay.removeChild(actionsDisplay.lastChild);
+    }
+}
+
 // Initialize the Quantum Interface when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.quantumInterface = new QuantumInterface();
+    
+    // Initialize Socket.IO
+    initializeSocket();
+    
+    // Add event listeners for device management buttons
+    const deviceSyncToggleBtn = document.getElementById('deviceSyncToggleBtn');
+    if (deviceSyncToggleBtn) {
+        deviceSyncToggleBtn.addEventListener('click', function() {
+            fetch('/api/device-sync/toggle', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateSyncStatus(data.enabled);
+                        showDeviceNotification(data.message, 'info');
+                    }
+                });
+        });
+    }
+    
+    const refreshDevicesBtn = document.getElementById('refreshDevicesBtn');
+    if (refreshDevicesBtn) {
+        refreshDevicesBtn.addEventListener('click', function() {
+            loadConnectedDevices();
+            showDeviceNotification('Devices refreshed', 'info');
+        });
+    }
+    
+    const scanDevicesBtn = document.getElementById('scanDevicesBtn');
+    if (scanDevicesBtn) {
+        scanDevicesBtn.addEventListener('click', function() {
+            if (socket) {
+                socket.emit('get_all_devices');
+                showDeviceNotification('Scanning for devices...', 'info');
+            }
+        });
+    }
+    
+    const syncAllDevicesBtn = document.getElementById('syncAllDevicesBtn');
+    if (syncAllDevicesBtn) {
+        syncAllDevicesBtn.addEventListener('click', function() {
+            connectedDevices.forEach(device => {
+                if (device.is_active) {
+                    syncDevice(device.device_id);
+                }
+            });
+        });
+    }
+    
+    const broadcastActionBtn = document.getElementById('broadcastActionBtn');
+    if (broadcastActionBtn) {
+        broadcastActionBtn.addEventListener('click', function() {
+            const action = prompt('Enter action to broadcast (activate, neural_scan, quantum_boost, security_scan):');
+            if (action && socket) {
+                connectedDevices.forEach(device => {
+                    if (device.is_active) {
+                        sendActionToDevice(device.device_id, action);
+                    }
+                });
+            }
+        });
+    }
+    
+    const disconnectAllBtn = document.getElementById('disconnectAllBtn');
+    if (disconnectAllBtn) {
+        disconnectAllBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to disconnect all devices?')) {
+                connectedDevices.forEach(device => {
+                    disconnectDevice(device.device_id);
+                });
+            }
+        });
+    }
+    
+    // Update connection URL with current host
+    const connectionUrlElement = document.getElementById('phoneConnectionUrl');
+    if (connectionUrlElement) {
+        const connectionUrl = `${window.location.protocol}//${window.location.host}`;
+        connectionUrlElement.textContent = connectionUrl;
+    }
 });
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
     if (window.quantumInterface) {
         window.quantumInterface.destroy();
+    }
+    if (socket) {
+        socket.disconnect();
     }
 });
